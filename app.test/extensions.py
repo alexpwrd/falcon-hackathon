@@ -19,6 +19,8 @@ import logging
 from dotenv import load_dotenv
 import os
 
+load_dotenv()
+
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 FALCON_API_KEY = os.getenv("FALCON_API_KEY")
 AI71_API_KEY = os.getenv("AI71_API_KEY")

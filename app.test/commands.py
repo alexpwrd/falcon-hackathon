@@ -11,6 +11,7 @@ from extensions import (
     os,
     datetime,
     subprocess,
+    time,
     #
 )
 
@@ -114,6 +115,7 @@ def take_photo(camera_id=0, filename='visionAId.jpg',filepath='~/storage/dcim/',
     camera_id = kwargs.get("camera_id", 0)
     # filename = f"photo_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.jpg"
     _path = os.path.join(filepath, filename)
+    print(_path)
     cmd = f"termux-camera-photo -c {camera_id} {_path}"
     subprocess.call(cmd, shell=True)
     return _path
