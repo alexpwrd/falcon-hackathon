@@ -20,7 +20,16 @@ def main():
             if user_input == "exit":
                 break
 
-            _path = take_photo()
+            # get current folder
+            dir_path = os.path.dirname(os.path.realpath(__file__))
+            filepath = os.path.join(dir_path, 'testimage/')
+            # check if folder exists
+            _path = os.path.abspath(filepath)
+            check = os.path.isdir(_path)
+            if not check:
+                os.makedirs(_path)
+
+            _path = take_photo(filepath=filepath)
             # check if file exists
             image_path = os.path.abspath(_path)
             check = os.path.isfile(image_path)
