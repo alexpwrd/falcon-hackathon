@@ -35,12 +35,12 @@ FALCON_HEADERS = {
     "Authorization": f"Bearer {AI71_API_KEY}"
 }
 
-def take_photo(camera_id=1, filename='visionAId.jpg', filepath='~/storage/dcim/'):
+def take_photo(camera_id=1, filename='visionAId.jpg', filepath='~/storage/dcim/', resolution='800x600'):
     _path = os.path.join(filepath, filename)
     _path = os.path.expanduser(_path)  # Expand the ~ in the filepath
     logger.info(f"Taking photo with camera ID {camera_id}")
     logger.info(f"Saving photo to {_path}")
-    cmd = f"termux-camera-photo -c {camera_id} {_path}"
+    cmd = f"termux-camera-photo -c {camera_id} -s {resolution} {_path}"
     try:
         subprocess.call(cmd, shell=True)
         logger.info(f"Photo saved to {_path}")
@@ -52,6 +52,12 @@ def take_photo(camera_id=1, filename='visionAId.jpg', filepath='~/storage/dcim/'
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
+
+def check_file_size(file_path):
+    size_bytes = os.path.getsize(file_path)
+    size_mb = size_bytes / (1024 * 1024)
+    logger.info(f"Image size: {size_mb:.2f} MB")
+    return size_mb
 
 def generate_image_description(image_path):
     logger.info("OpenAI: Generating image description")
@@ -100,6 +106,7 @@ def generate_instructions(image_description):
             {"role": "system", "content": "You are an AI assistant helping a blind person navigate. Provide very brief, clear instructions for safe movement based on the image description."},
             {"role": "user", "content": f"Based on this image description, what should a blind person do next? Keep it brief. Image description: {image_description}"}
         ],
+        "max_tokens": 100
     }
     
     try:
@@ -117,6 +124,11 @@ def generate_instructions(image_description):
 def process_image():
     image_path = take_photo()  # Use front camera (camera_id=1)
     if image_path and os.path.exists(image_path):
+        file_size_mb = check_file_size(image_path)
+        if file_size_mb > 20:
+            logger.error(f"Image size ({file_size_mb:.2f} MB) exceeds 20 MB limit")
+            return {"error": "Image size exceeds 20 MB limit"}
+        
         image_description = generate_image_description(image_path)
         instructions = generate_instructions(image_description)
         logger.info(f"Full image description: {image_description}")
