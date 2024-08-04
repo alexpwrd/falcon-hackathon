@@ -5,11 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Falcon Vision Aid</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        #resizedImage {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <h1>Falcon Vision Aid</h1>
     <button id="captureButton">Simulate Capture Image</button>
     <div id="result"></div>
+    <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
 
     <script>
         $(document).ready(function() {
@@ -17,12 +25,16 @@
             $('#captureButton').click(function() {
                 console.log('Capture button clicked');
                 $('#result').html('<p>Processing image...</p>');
+                $('#resizedImage').hide();
                 $.ajax({
                     url: '/process_image',
                     type: 'POST',
                     success: function(response) {
                         console.log('Received response from server');
                         $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
+                        if (response.resized_image_url) {
+                            $('#resizedImage').attr('src', response.resized_image_url).show();
+                        }
                         console.log('Updated result on page');
                     },
                     error: function(xhr, status, error) {

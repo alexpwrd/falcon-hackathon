@@ -7,7 +7,7 @@ import subprocess
 from datetime import datetime
 from dotenv import load_dotenv
 import imghdr
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -38,6 +38,7 @@ FALCON_HEADERS = {
 }
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
 def take_photo(camera_id=1, filename='visionAId.jpg', filepath='~/storage/dcim/', resolution='800x600'):
     _path = os.path.join(filepath, filename)
@@ -68,9 +69,13 @@ def check_image_format(file_path):
         logger.error(f"Error checking image format: {e}")
         return None
 
-def resize_and_encode_image(image_path, target_size="512x512"):
-    resized_path = image_path.replace('.jpg', '_resized.jpg')
+def resize_and_save_image(image_path, target_size="512x512"):
+    resized_filename = f"resized_{os.path.basename(image_path)}"
+    resized_path = os.path.join(app.config['UPLOAD_FOLDER'], resized_filename)
     try:
+        # Ensure the upload folder exists
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        
         # Resize image using ImageMagick's magick convert command
         subprocess.run(['magick', 'convert', image_path, '-resize', target_size+'^', '-gravity', 'center', '-extent', target_size, resized_path], check=True)
         logger.info(f"Image resized and saved to {resized_path}")
@@ -84,16 +89,12 @@ def resize_and_encode_image(image_path, target_size="512x512"):
         resized_size_mb = check_file_size(resized_path)
         logger.info(f"Resized image file size: {resized_size_mb:.2f} MB")
         
-        # Read and encode the resized image
-        with open(resized_path, "rb") as image_file:
-            encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
-        logger.info(f"Image encoded successfully. Encoded length: {len(encoded_image)}")
-        return encoded_image
+        return resized_filename
     except subprocess.CalledProcessError as e:
         logger.error(f"Error resizing image: {e}")
         return None
     except Exception as e:
-        logger.error(f"Error encoding image: {e}")
+        logger.error(f"Error saving resized image: {e}")
         return None
 
 def generate_image_description(image_path):
@@ -173,18 +174,25 @@ def process_image():
         logger.info(f"Original image size: {file_size_mb:.2f} MB")
         logger.info(f"Original image format: {image_format}")
         
-        image_description = generate_image_description(image_path)
+        resized_filename = resize_and_save_image(image_path)
+        if resized_filename is None:
+            return {"error": "Failed to resize and save image"}
+        
+        resized_path = os.path.join(app.config['UPLOAD_FOLDER'], resized_filename)
+        image_description = generate_image_description(resized_path)
         
         # Check size of resized image
-        resized_path = image_path.replace('.jpg', '_resized.jpg')
-        if os.path.exists(resized_path):
-            resized_size_mb = check_file_size(resized_path)
-            logger.info(f"Resized image size: {resized_size_mb:.2f} MB")
+        resized_size_mb = check_file_size(resized_path)
+        logger.info(f"Resized image size: {resized_size_mb:.2f} MB")
         
         instructions = generate_instructions(image_description)
         logger.info(f"Full image description: {image_description}")
         logger.info(f"Full instructions: {instructions}")
-        return {"description": image_description, "instructions": instructions}
+        return {
+            "description": image_description, 
+            "instructions": instructions,
+            "resized_image_url": f"/uploads/{resized_filename}"
+        }
     else:
         logger.error("Failed to take photo or photo file not found")
         return {"error": "Failed to take photo or photo file not found"}
@@ -207,6 +215,10 @@ def speak_route():
     text = data.get('text', '')
     speak_text(text)
     return jsonify({"status": "success", "message": "Text spoken successfully"})
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001, debug=True)
