@@ -3,9 +3,8 @@ import requests
 import json
 import base64
 import logging
+import subprocess
 from dotenv import load_dotenv
-from openai import OpenAI
-from flask import Flask, render_template, request, jsonify
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -16,23 +15,17 @@ load_dotenv()
 
 # API keys
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-FALCON_API_KEY = os.getenv("FALCON_API_KEY")
-
-# Initialize OpenAI client
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
-
-# Falcon API setup
 AI71_API_KEY = os.getenv("AI71_API_KEY")
+
 if not AI71_API_KEY:
     raise ValueError("AI71_API_KEY not found in .env file")
 
+# Falcon API setup
 FALCON_API_URL = "https://api.ai71.ai/v1/chat/completions"
 FALCON_HEADERS = {
     "Content-Type": "application/json",
     "Authorization": f"Bearer {AI71_API_KEY}"
 }
-
-app = Flask(__name__)
 
 def encode_image(image_path):
     logger.info(f"Encoding image: {image_path}")
@@ -43,9 +36,14 @@ def generate_image_description(image_path):
     logger.info("Generating image description")
     base64_image = encode_image(image_path)
     
-    response = openai_client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {OPENAI_API_KEY}"
+    }
+    
+    payload = {
+        "model": "gpt-4-vision-preview",
+        "messages": [
             {
                 "role": "system",
                 "content": "You are a helpful assistant that describes images in detail for blind people. Focus on important elements, spatial relationships, and potential hazards or obstacles."
@@ -58,8 +56,11 @@ def generate_image_description(image_path):
                 ]
             }
         ]
-    )
-    description = response.choices[0].message.content
+    }
+    
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+    response.raise_for_status()
+    description = response.json()['choices'][0]['message']['content']
     logger.info(f"Generated description: {description[:100]}...")  # Log first 100 characters
     return description
 
@@ -85,20 +86,40 @@ def generate_instructions(image_description):
             logger.error(f"Response content: {e.response.content}")
         return "I'm sorry, I couldn't generate instructions at this time."
 
-@app.route('/')
-def index():
-    logger.info("Serving index page")
-    return render_template('index.html')
+def take_photo():
+    image_path = "/sdcard/Pictures/falcon_vision_photo.jpg"
+    subprocess.run(["termux-camera-photo", image_path])
+    return image_path
 
-@app.route('/process_image', methods=['POST'])
-def process_image():
-    logger.info("Processing image request received")
-    image_path = "testimage/test.png"
+def speak_text(text):
+    subprocess.run(["termux-tts-speak", text])
+
+def process_image(image_path):
+    logger.info("Processing image")
     image_description = generate_image_description(image_path)
     instructions = generate_instructions(image_description)
     logger.info("Image processing completed")
-    return jsonify({"description": image_description, "instructions": instructions})
+    return {"description": image_description, "instructions": instructions}
+
+def main():
+    print("Welcome to Falcon Vision!")
+    while True:
+        user_input = input("Press Enter to take a photo and process it, or type 'exit' to quit: ")
+        if user_input.lower() == 'exit':
+            break
+        
+        image_path = take_photo()
+        result = process_image(image_path)
+        
+        print("\nImage Description:")
+        print(result["description"])
+        speak_text(result["description"])
+        
+        print("\nInstructions:")
+        print(result["instructions"])
+        speak_text(result["instructions"])
+        
+        print("\n")
 
 if __name__ == "__main__":
-    logger.info("Starting Flask application")
-    app.run(debug=True)
+    main()
