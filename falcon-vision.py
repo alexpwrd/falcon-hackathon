@@ -3,8 +3,8 @@ import requests
 import json
 import base64
 import logging
-import subprocess
 from dotenv import load_dotenv
+from flask import Flask, render_template, jsonify, request
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -17,109 +17,90 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 AI71_API_KEY = os.getenv("AI71_API_KEY")
 
-if not AI71_API_KEY:
-    raise ValueError("AI71_API_KEY not found in .env file")
+if not AI71_API_KEY or not OPENAI_API_KEY:
+    raise ValueError("API keys not found in .env file")
 
-# Falcon API setup
+# API setups
+OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
 FALCON_API_URL = "https://api.ai71.ai/v1/chat/completions"
+
+OPENAI_HEADERS = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {OPENAI_API_KEY}"
+}
+
 FALCON_HEADERS = {
     "Content-Type": "application/json",
     "Authorization": f"Bearer {AI71_API_KEY}"
 }
 
+app = Flask(__name__)
+
 def encode_image(image_path):
-    logger.info(f"Encoding image: {image_path}")
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 def generate_image_description(image_path):
-    logger.info("Generating image description")
+    logger.info("OpenAI: Generating image description")
     base64_image = encode_image(image_path)
     
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {OPENAI_API_KEY}"
-    }
-    
     payload = {
-        "model": "gpt-4-vision-preview",
+        "model": "gpt-4o",
         "messages": [
-            {
-                "role": "system",
-                "content": "You are a helpful assistant that describes images in detail for blind people. Focus on important elements, spatial relationships, and potential hazards or obstacles."
-            },
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "Describe this image in detail for a blind person. What are the main elements and their layout?"},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                    {"type": "text", "text": "Describe this image concisely for a blind person. Focus on the main elements and their layout."},
+                    {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{base64_image}"}}
                 ]
             }
-        ]
+        ],
+        "max_tokens": 200
     }
     
-    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+    response = requests.post(OPENAI_API_URL, headers=OPENAI_HEADERS, json=payload)
     response.raise_for_status()
     description = response.json()['choices'][0]['message']['content']
-    logger.info(f"Generated description: {description[:100]}...")  # Log first 100 characters
+    logger.info(f"OpenAI: Generated description: {description[:100]}...")
     return description
 
 def generate_instructions(image_description):
-    logger.info("Generating instructions based on image description")
+    logger.info("Falcon: Generating instructions based on image description")
     payload = {
         "model": "tiiuae/falcon-180B-chat",
         "messages": [
-            {"role": "system", "content": "You are an AI assistant helping a blind person navigate based on an image description. Provide clear, concise instructions for safe movement."},
-            {"role": "user", "content": f"Based on this image description, what should a blind person do next? Image description: {image_description}"}
-        ]
+            {"role": "system", "content": "You are an AI assistant helping a blind person navigate. Provide very brief, clear instructions for safe movement based on the image description."},
+            {"role": "user", "content": f"Based on this image description, what should a blind person do next? Keep it brief. Image description: {image_description}"}
+        ],
+        "max_tokens": 100
     }
     
     try:
         response = requests.post(FALCON_API_URL, headers=FALCON_HEADERS, json=payload)
         response.raise_for_status()
         instructions = response.json()['choices'][0]['message']['content']
-        logger.info(f"Generated instructions: {instructions[:100]}...")  # Log first 100 characters
+        logger.info(f"Falcon: Generated instructions: {instructions[:100]}...")
         return instructions
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error in API request: {e}")
+        logger.error(f"Falcon: Error in API request: {e}")
         if hasattr(e, 'response') and e.response is not None:
-            logger.error(f"Response content: {e.response.content}")
+            logger.error(f"Falcon: Response content: {e.response.content}")
         return "I'm sorry, I couldn't generate instructions at this time."
 
-def take_photo():
-    image_path = "/sdcard/Pictures/falcon_vision_photo.jpg"
-    subprocess.run(["termux-camera-photo", image_path])
-    return image_path
-
-def speak_text(text):
-    subprocess.run(["termux-tts-speak", text])
-
 def process_image(image_path):
-    logger.info("Processing image")
     image_description = generate_image_description(image_path)
     instructions = generate_instructions(image_description)
-    logger.info("Image processing completed")
     return {"description": image_description, "instructions": instructions}
 
-def main():
-    print("Welcome to Falcon Vision!")
-    while True:
-        user_input = input("Press Enter to take a photo and process it, or type 'exit' to quit: ")
-        if user_input.lower() == 'exit':
-            break
-        
-        image_path = take_photo()
-        result = process_image(image_path)
-        
-        print("\nImage Description:")
-        print(result["description"])
-        speak_text(result["description"])
-        
-        print("\nInstructions:")
-        print(result["instructions"])
-        speak_text(result["instructions"])
-        
-        print("\n")
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/process_image', methods=['POST'])
+def process_image_route():
+    image_path = "testimage/test.png"  # For now, we're using a static test image
+    result = process_image(image_path)
+    return jsonify(result)
 
 if __name__ == "__main__":
-    main()
+    app.run(host='0.0.0.0', port=5001, debug=True)
