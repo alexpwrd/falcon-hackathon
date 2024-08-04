@@ -3,6 +3,8 @@ import requests
 import json
 import base64
 import logging
+import subprocess
+import tempfile
 from dotenv import load_dotenv
 from flask import Flask, render_template, jsonify, request
 
@@ -36,6 +38,20 @@ FALCON_HEADERS = {
 
 app = Flask(__name__)
 
+def take_photo():
+    logger.info("Taking photo with front camera")
+    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as temp_file:
+        temp_filename = temp_file.name
+    
+    try:
+        # Use termux-camera-photo to take a picture with the front camera
+        subprocess.run(["termux-camera-photo", "-c", "1", temp_filename], check=True)
+        logger.info(f"Photo saved to {temp_filename}")
+        return temp_filename
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error taking photo: {e}")
+        return None
+
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
@@ -51,7 +67,7 @@ def generate_image_description(image_path):
                 "role": "user",
                 "content": [
                     {"type": "text", "text": "Describe this image concisely for a blind person. Focus on the main elements and their layout."},
-                    {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{base64_image}"}}
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                 ]
             }
         ],
@@ -87,10 +103,15 @@ def generate_instructions(image_description):
             logger.error(f"Falcon: Response content: {e.response.content}")
         return "I'm sorry, I couldn't generate instructions at this time."
 
-def process_image(image_path):
-    image_description = generate_image_description(image_path)
-    instructions = generate_instructions(image_description)
-    return {"description": image_description, "instructions": instructions}
+def process_image():
+    image_path = take_photo()
+    if image_path:
+        image_description = generate_image_description(image_path)
+        instructions = generate_instructions(image_description)
+        os.unlink(image_path)  # Delete the temporary file
+        return {"description": image_description, "instructions": instructions}
+    else:
+        return {"error": "Failed to take photo"}
 
 @app.route('/')
 def index():
@@ -98,8 +119,7 @@ def index():
 
 @app.route('/process_image', methods=['POST'])
 def process_image_route():
-    image_path = "testimage/test.png"  # For now, we're using a static test image
-    result = process_image(image_path)
+    result = process_image()
     return jsonify(result)
 
 if __name__ == "__main__":
