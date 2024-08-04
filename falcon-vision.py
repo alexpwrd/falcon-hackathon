@@ -53,19 +53,6 @@ def take_photo(camera_id=0, filename='visionAId.jpg', filepath='~/storage/dcim/'
         logger.error(f"Error taking photo: {e}")
         return None
 
-def preprocess_image(image_path, max_size="1024x1024", output_path=None):
-    if output_path is None:
-        output_path = image_path.rsplit('.', 1)[0] + '_resized.jpg'
-    
-    cmd = f"convert '{image_path}' -resize {max_size}\\> -quality 85 '{output_path}'"
-    try:
-        subprocess.call(cmd, shell=True)
-        logger.info(f"Preprocessed image saved to {output_path}")
-        return output_path
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Error preprocessing image: {e}")
-        return None
-
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
@@ -73,15 +60,10 @@ def encode_image(image_path):
 def generate_image_description(image_path):
     logger.info("OpenAI: Generating image description")
     
-    # Preprocess and encode the image
-    preprocessed_image_path = preprocess_image(image_path)
-    if not preprocessed_image_path:
-        return "I'm sorry, I couldn't process the image at this time."
-    
-    base64_image = encode_image(preprocessed_image_path)
+    base64_image = encode_image(image_path)
     
     payload = {
-        "model": "gpt-4-vision-preview",
+        "model": "gpt-4o-mini",
         "messages": [
             {
                 "role": "user",
@@ -93,8 +75,7 @@ def generate_image_description(image_path):
                     {
                         "type": "image_url",
                         "image_url": {
-                            "url": f"data:image/jpeg;base64,{base64_image}",
-                            "detail": "auto"
+                            "url": f"data:image/jpeg;base64,{base64_image}"
                         }
                     }
                 ]
