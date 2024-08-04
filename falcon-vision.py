@@ -69,7 +69,7 @@ def check_image_format(file_path):
         logger.error(f"Error checking image format: {e}")
         return None
 
-def resize_and_save_image(image_path, target_size="512x512"):
+def resize_and_encode_image(image_path, target_size="512x512"):
     resized_filename = f"resized_{os.path.basename(image_path)}"
     resized_path = os.path.join(app.config['UPLOAD_FOLDER'], resized_filename)
     try:
@@ -80,30 +80,25 @@ def resize_and_save_image(image_path, target_size="512x512"):
         subprocess.run(['magick', 'convert', image_path, '-resize', target_size+'^', '-gravity', 'center', '-extent', target_size, resized_path], check=True)
         logger.info(f"Image resized and saved to {resized_path}")
         
-        # Check the size of the resized image
-        result = subprocess.run(['magick', 'identify', '-format', '%wx%h', resized_path], capture_output=True, text=True)
-        resized_dimensions = result.stdout.strip()
-        logger.info(f"Resized image dimensions: {resized_dimensions}")
-        
-        # Check file size of resized image
-        resized_size_mb = check_file_size(resized_path)
-        logger.info(f"Resized image file size: {resized_size_mb:.2f} MB")
-        
-        return resized_filename
+        # Read and encode the resized image
+        with open(resized_path, "rb") as image_file:
+            encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+        logger.info(f"Image encoded successfully. Encoded length: {len(encoded_image)}")
+        return encoded_image, resized_filename
     except subprocess.CalledProcessError as e:
         logger.error(f"Error resizing image: {e}")
-        return None
+        return None, None
     except Exception as e:
-        logger.error(f"Error saving resized image: {e}")
-        return None
+        logger.error(f"Error encoding image: {e}")
+        return None, None
 
 def generate_image_description(image_path):
     logger.info("OpenAI: Generating image description")
     
-    base64_image = resize_and_encode_image(image_path)
+    base64_image, resized_filename = resize_and_encode_image(image_path)
     if not base64_image:
         logger.error("Failed to resize and encode image")
-        return "I'm sorry, I couldn't process the image at this time."
+        return "I'm sorry, I couldn't process the image at this time.", None
     
     payload = {
         "model": "gpt-4o-mini",
@@ -134,13 +129,13 @@ def generate_image_description(image_path):
         response.raise_for_status()
         description = response.json()['choices'][0]['message']['content']
         logger.info(f"OpenAI: Generated description: {description[:100]}...")
-        return description
+        return description, resized_filename
     except requests.exceptions.RequestException as e:
         logger.error(f"OpenAI: Error in API request: {e}")
         if hasattr(e, 'response') and e.response is not None:
             logger.error(f"OpenAI: Response status code: {e.response.status_code}")
             logger.error(f"OpenAI: Response content: {e.response.content}")
-        return "I'm sorry, I couldn't generate a description at this time."
+        return "I'm sorry, I couldn't generate a description at this time.", None
 
 def generate_instructions(image_description):
     logger.info("Falcon: Generating instructions based on image description")
@@ -174,12 +169,11 @@ def process_image():
         logger.info(f"Original image size: {file_size_mb:.2f} MB")
         logger.info(f"Original image format: {image_format}")
         
-        resized_filename = resize_and_save_image(image_path)
+        image_description, resized_filename = generate_image_description(image_path)
         if resized_filename is None:
-            return {"error": "Failed to resize and save image"}
+            return {"error": "Failed to resize and encode image"}
         
         resized_path = os.path.join(app.config['UPLOAD_FOLDER'], resized_filename)
-        image_description = generate_image_description(resized_path)
         
         # Check size of resized image
         resized_size_mb = check_file_size(resized_path)
