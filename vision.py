@@ -68,12 +68,12 @@ def check_image_format(file_path):
 def resize_and_encode_image(image_path, target_size="512x512"):
     resized_path = image_path.replace('.jpg', '_resized.jpg')
     try:
-        # Resize image using ImageMagick's convert command
-        subprocess.run(['convert', image_path, '-resize', target_size+'^', '-gravity', 'center', '-extent', target_size, resized_path], check=True)
+        # Resize image using ImageMagick's magick convert command
+        subprocess.run(['magick', 'convert', image_path, '-resize', target_size+'^', '-gravity', 'center', '-extent', target_size, resized_path], check=True)
         logger.info(f"Image resized and saved to {resized_path}")
         
         # Check the size of the resized image
-        result = subprocess.run(['identify', '-format', '%wx%h', resized_path], capture_output=True, text=True)
+        result = subprocess.run(['magick', 'identify', '-format', '%wx%h', resized_path], capture_output=True, text=True)
         resized_dimensions = result.stdout.strip()
         logger.info(f"Resized image dimensions: {resized_dimensions}")
         
