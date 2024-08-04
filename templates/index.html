@@ -6,40 +6,77 @@
     <title>Falcon Vision Aid</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
         #resizedImage {
             max-width: 100%;
             height: auto;
             margin-top: 20px;
         }
+        #captureButton {
+            font-size: 18px;
+            padding: 10px 20px;
+        }
+        #loading {
+            display: none;
+            margin-top: 20px;
+        }
+        .spoken-status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .spoken-success {
+            color: green;
+        }
+        .spoken-failure {
+            color: red;
+        }
     </style>
 </head>
 <body>
     <h1>Falcon Vision Aid</h1>
-    <button id="captureButton">Simulate Capture Image</button>
+    <button id="captureButton">Capture New Image</button>
+    <div id="loading">Processing image... Please wait.</div>
     <div id="result"></div>
+    <div id="spokenStatus" class="spoken-status"></div>
     <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
 
     <script>
         $(document).ready(function() {
-            console.log('Page loaded');
             $('#captureButton').click(function() {
-                console.log('Capture button clicked');
-                $('#result').html('<p>Processing image...</p>');
+                $('#result').empty();
+                $('#spokenStatus').empty();
                 $('#resizedImage').hide();
+                $('#loading').show();
+                $('#captureButton').prop('disabled', true);
+
                 $.ajax({
                     url: '/process_image',
                     type: 'POST',
                     success: function(response) {
-                        console.log('Received response from server');
-                        $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
-                        if (response.resized_image_url) {
+                        $('#loading').hide();
+                        $('#captureButton').prop('disabled', false);
+                        if (response.error) {
+                            $('#result').html('<p>Error: ' + response.error + '</p>');
+                        } else {
+                            $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
                             $('#resizedImage').attr('src', response.resized_image_url).show();
+                            
+                            if (response.instructions_spoken) {
+                                $('#spokenStatus').html('Instructions were spoken successfully').addClass('spoken-success').removeClass('spoken-failure');
+                            } else {
+                                $('#spokenStatus').html('Failed to speak instructions').addClass('spoken-failure').removeClass('spoken-success');
+                            }
                         }
-                        console.log('Updated result on page');
                     },
                     error: function(xhr, status, error) {
-                        console.error('Error occurred:', error);
-                        $('#result').html('<p>An error occurred.</p>');
+                        $('#loading').hide();
+                        $('#captureButton').prop('disabled', false);
+                        $('#result').html('<p>An error occurred: ' + error + '</p>');
                     }
                 });
             });

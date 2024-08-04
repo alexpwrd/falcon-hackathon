@@ -160,6 +160,15 @@ def generate_instructions(image_description):
             logger.error(f"Falcon: Response content: {e.response.content}")
         return "I'm sorry, I couldn't generate instructions at this time."
 
+def speak_text(text):
+    try:
+        subprocess.run(['termux-tts-speak', text], check=True)
+        logger.info(f"Text spoken successfully: {text[:50]}...")
+        return True
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error speaking text: {e}")
+        return False
+
 def process_image():
     image_path = take_photo()  # Use front camera (camera_id=1)
     if image_path and os.path.exists(image_path):
@@ -182,10 +191,15 @@ def process_image():
         instructions = generate_instructions(image_description)
         logger.info(f"Full image description: {image_description}")
         logger.info(f"Full instructions: {instructions}")
+        
+        # Speak the Falcon instructions and get the result
+        instructions_spoken = speak_text(instructions)
+        
         return {
             "description": image_description, 
             "instructions": instructions,
-            "resized_image_url": f"/uploads/{resized_filename}"
+            "resized_image_url": f"/uploads/{resized_filename}?t={datetime.now().timestamp()}",
+            "instructions_spoken": instructions_spoken
         }
     else:
         logger.error("Failed to take photo or photo file not found")
@@ -199,16 +213,6 @@ def index():
 def process_image_route():
     result = process_image()
     return jsonify(result)
-
-def speak_text(text):
-    os.system(f"termux-tts-speak '{text}'")
-
-@app.route('/speak', methods=['POST'])
-def speak_route():
-    data = request.json
-    text = data.get('text', '')
-    speak_text(text)
-    return jsonify({"status": "success", "message": "Text spoken successfully"})
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
