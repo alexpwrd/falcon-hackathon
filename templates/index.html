@@ -17,10 +17,11 @@
             height: auto;
             margin-top: 20px;
         }
-        #captureButton, #continuousButton {
+        .btn-custom {
             font-size: 18px;
             padding: 10px 20px;
-            margin-right: 10px;
+            margin: 5px 0;
+            width: 100%;
         }
         #loading {
             display: none;
@@ -40,8 +41,8 @@
 </head>
 <body>
     <h1>Falcon Vision Aid</h1>
-    <button id="captureButton" class="btn btn-primary">Capture New Image</button>
-    <button id="continuousButton" class="btn btn-secondary">Start Live Capture</button>
+    <button id="captureButton" class="btn btn-primary btn-custom">Capture New Image</button>
+    <button id="continuousButton" class="btn btn-secondary btn-custom">Start Live Capture</button>
     <div id="loading">Processing image... Please wait.</div>
     <div id="result"></div>
     <div id="spokenStatus" class="spoken-status"></div>
@@ -50,12 +51,13 @@
     <script>
         let continuousProcessRunning = false;
 
-        function processImage() {
+        function processImage(callback) {
             $('#result').empty();
             $('#spokenStatus').empty();
             $('#resizedImage').hide();
             $('#loading').show();
             $('#captureButton').prop('disabled', true);
+            $('#continuousButton').prop('disabled', true);
 
             $.ajax({
                 url: '/process_image',
@@ -63,6 +65,7 @@
                 success: function(response) {
                     $('#loading').hide();
                     $('#captureButton').prop('disabled', false);
+                    $('#continuousButton').prop('disabled', false);
                     if (response.error) {
                         $('#result').html('<p>Error: ' + response.error + '</p>');
                     } else {
@@ -76,22 +79,29 @@
                         }
                     }
 
-                    // Continue the process if continuous process is running
-                    if (continuousProcessRunning) {
-                        processImage();
+                    // Callback to continue the process if continuous process is running
+                    if (callback) {
+                        callback();
                     }
                 },
                 error: function(xhr, status, error) {
                     $('#loading').hide();
                     $('#captureButton').prop('disabled', false);
+                    $('#continuousButton').prop('disabled', false);
                     $('#result').html('<p>An error occurred: ' + error + '</p>');
 
-                    // Continue the process if continuous process is running
-                    if (continuousProcessRunning) {
-                        processImage();
+                    // Callback to continue the process if continuous process is running
+                    if (callback) {
+                        callback();
                     }
                 }
             });
+        }
+
+        function startContinuousProcess() {
+            if (continuousProcessRunning) {
+                processImage(startContinuousProcess);
+            }
         }
 
         $(document).ready(function() {
@@ -106,7 +116,7 @@
                 } else {
                     continuousProcessRunning = true;
                     $('#continuousButton').text('Stop Live Capture').removeClass('btn-secondary').addClass('btn-danger');
-                    processImage();
+                    startContinuousProcess();
                 }
             });
         });
