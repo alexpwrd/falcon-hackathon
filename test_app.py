@@ -16,7 +16,8 @@
 
 # python requirements: numpy, pandas (link:)[https://github.com/termux/termux-packages/discussions/19126]
 # when errors occurs in installing python packages usually `export MATHLIB=m` fixes the issue
-# pip install ai71 openai langchain
+
+# pip install ai71 openai langchain fuzzywuzzy
 
 # connect phone screen to mac
 # Stay Awake: scrcpy --stay-awake
