@@ -53,16 +53,35 @@ def take_photo(camera_id=0, filename='visionAId.jpg', filepath='~/storage/dcim/'
         logger.error(f"Error taking photo: {e}")
         return None
 
+def preprocess_image(image_path, max_size="1024x1024", output_path=None):
+    if output_path is None:
+        output_path = image_path.rsplit('.', 1)[0] + '_resized.jpg'
+    
+    cmd = f"convert '{image_path}' -resize {max_size}\\> -quality 85 '{output_path}'"
+    try:
+        subprocess.call(cmd, shell=True)
+        logger.info(f"Preprocessed image saved to {output_path}")
+        return output_path
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error preprocessing image: {e}")
+        return None
+
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 def generate_image_description(image_path):
     logger.info("OpenAI: Generating image description")
-    base64_image = encode_image(image_path)
+    
+    # Preprocess and encode the image
+    preprocessed_image_path = preprocess_image(image_path)
+    if not preprocessed_image_path:
+        return "I'm sorry, I couldn't process the image at this time."
+    
+    base64_image = encode_image(preprocessed_image_path)
     
     payload = {
-        "model": "gpt-4o-mini",
+        "model": "gpt-4-vision-preview",
         "messages": [
             {
                 "role": "user",
@@ -84,14 +103,9 @@ def generate_image_description(image_path):
         "max_tokens": 300
     }
     
-    logger.info(f"OpenAI: Sending request with payload: {json.dumps(payload, indent=2)}")
-    
     try:
         response = requests.post(OPENAI_API_URL, headers=OPENAI_HEADERS, json=payload)
         response.raise_for_status()
-        logger.info(f"OpenAI: Response status code: {response.status_code}")
-        logger.info(f"OpenAI: Response headers: {response.headers}")
-        logger.info(f"OpenAI: Response content: {response.text}")
         description = response.json()['choices'][0]['message']['content']
         logger.info(f"OpenAI: Generated description: {description[:100]}...")
         return description
@@ -126,13 +140,12 @@ def generate_instructions(image_description):
 
 def process_image():
     image_path = take_photo(camera_id=1)  # Use front camera
-    if image_path:
+    if image_path and os.path.exists(image_path):
         image_description = generate_image_description(image_path)
         instructions = generate_instructions(image_description)
-        # os.unlink(image_path)  # Commented out to keep the photo
         return {"description": image_description, "instructions": instructions}
     else:
-        return {"error": "Failed to take photo"}
+        return {"error": "Failed to take photo or photo file not found"}
 
 @app.route('/')
 def index():
