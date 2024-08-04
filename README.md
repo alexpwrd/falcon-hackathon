@@ -1,60 +1,70 @@
-# Falcon AI Hackathon Project
+# Falcon Vision Aid
 
-This project demonstrates how to interact with the Falcon AI model using the AI71 API.
+This project is a vision aid application that uses AI to describe images and provide navigation instructions for visually impaired users. It's designed to run on Android devices using Termux.
 
-## Setup
+## Setup on Android with Termux
 
-### 1. Miniconda Installation
+1. Install Termux from F-Droid:
+   - Visit https://f-droid.org/en/packages/com.termux/ on your Android device
+   - Download and install the Termux app
 
-If you don't have Miniconda installed, follow these steps:
-
-a. Download Miniconda for your operating system: https://docs.conda.io/en/latest/miniconda.html
-
-b. Install Miniconda by following the instructions for your OS: https://conda.io/projects/conda/en/latest/user-guide/install/index.html
-
-### 2. Create and Activate Conda Environment
-
-Once Miniconda is installed, create and activate a new environment with Python 3.11:
-
-```bash
-conda create -n falcon python=3.11
-conda activate falcon
-```
-
-### 3. Project Setup
-
-1. Clone this repository:
+2. Open Termux and update the package list:
    ```
-   git clone <your-repo-url>
-   cd <your-repo-directory>
+   pkg update
    ```
 
-2. Install the required packages:
+3. Install required packages:
+   ```
+   pkg install python git opencv-python imagemagick
+   ```
+
+4. Clone this repository:
+   ```
+   git clone https://github.com/alexpwrd/falcon-hackathon.git
+   cd falcon-hackathon
+   ```
+
+5. Install Python dependencies:
    ```
    pip install -r requirements.txt
    ```
 
-3. Create a `.env` file in the project root and add your AI71 API key:
+6. Set up environment variables:
+   Create a `.env` file in the project root and add your API keys:
    ```
-   AI71_API_KEY=your_actual_api_key_here
+   echo "OPENAI_API_KEY=your_openai_api_key_here" > .env
+   echo "AI71_API_KEY=your_ai71_api_key_here" >> .env
    ```
+
+7. Grant camera permissions to Termux:
+   ```
+   termux-setup-storage
+   ```
+   Then allow storage access when prompted.
 
 ## Usage
 
-Ensure your conda environment is activated:
+1. Run the Flask application:
+   ```
+   python falcon-vision.py
+   ```
 
-```bash
-conda activate falcon
-```
+2. Open a web browser on your device and navigate to:
+   ```
+   http://localhost:5001
+   ```
 
-Then, run the main script to test the Falcon AI model:
-
-```bash
-python test.py
-```
-
-This script demonstrates two functionalities:
-1. A simple chat completion
-2. A streaming chat completion
+3. Click the "Simulate Capture Image" button to process an image and receive a description and navigation instructions.
 
 ## Files
+
+- `falcon-vision.py`: Main application file
+- `templates/index.html`: Web interface
+- `requirements.txt`: Python dependencies
+- `.env`: Environment variables (API keys)
+
+## Note
+
+This application requires an active internet connection to communicate with the OpenAI and AI71 APIs.
+
+For more information about the project, visit the [original repository](https://github.com/alexpwrd/falcon-hackathon).
