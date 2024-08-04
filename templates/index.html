@@ -17,9 +17,10 @@
             height: auto;
             margin-top: 20px;
         }
-        #captureButton {
+        #captureButton, #continuousButton {
             font-size: 18px;
             padding: 10px 20px;
+            margin-right: 10px;
         }
         #loading {
             display: none;
@@ -40,45 +41,76 @@
 <body>
     <h1>Falcon Vision Aid</h1>
     <button id="captureButton">Capture New Image</button>
+    <button id="continuousButton">Start Continuous (Live Capture)</button>
     <div id="loading">Processing image... Please wait.</div>
     <div id="result"></div>
     <div id="spokenStatus" class="spoken-status"></div>
     <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
 
     <script>
+        let continuousProcessRunning = false;
+
+        function processImage() {
+            $('#result').empty();
+            $('#spokenStatus').empty();
+            $('#resizedImage').hide();
+            $('#loading').show();
+            $('#captureButton').prop('disabled', true);
+            $('#continuousButton').prop('disabled', true);
+
+            $.ajax({
+                url: '/process_image',
+                type: 'POST',
+                success: function(response) {
+                    $('#loading').hide();
+                    $('#captureButton').prop('disabled', false);
+                    $('#continuousButton').prop('disabled', false);
+                    if (response.error) {
+                        $('#result').html('<p>Error: ' + response.error + '</p>');
+                    } else {
+                        $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
+                        $('#resizedImage').attr('src', response.resized_image_url).show();
+
+                        if (response.instructions_spoken) {
+                            $('#spokenStatus').html('Instructions were spoken successfully').addClass('spoken-success').removeClass('spoken-failure');
+                        } else {
+                            $('#spokenStatus').html('Failed to speak instructions').addClass('spoken-failure').removeClass('spoken-success');
+                        }
+                    }
+
+                    // Continue the process if continuous process is running
+                    if (continuousProcessRunning) {
+                        processImage();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#loading').hide();
+                    $('#captureButton').prop('disabled', false);
+                    $('#continuousButton').prop('disabled', false);
+                    $('#result').html('<p>An error occurred: ' + error + '</p>');
+
+                    // Continue the process if continuous process is running
+                    if (continuousProcessRunning) {
+                        processImage();
+                    }
+                }
+            });
+        }
+
         $(document).ready(function() {
             $('#captureButton').click(function() {
-                $('#result').empty();
-                $('#spokenStatus').empty();
-                $('#resizedImage').hide();
-                $('#loading').show();
-                $('#captureButton').prop('disabled', true);
+                processImage();
+            });
 
-                $.ajax({
-                    url: '/process_image',
-                    type: 'POST',
-                    success: function(response) {
-                        $('#loading').hide();
-                        $('#captureButton').prop('disabled', false);
-                        if (response.error) {
-                            $('#result').html('<p>Error: ' + response.error + '</p>');
-                        } else {
-                            $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
-                            $('#resizedImage').attr('src', response.resized_image_url).show();
-                            
-                            if (response.instructions_spoken) {
-                                $('#spokenStatus').html('Instructions were spoken successfully').addClass('spoken-success').removeClass('spoken-failure');
-                            } else {
-                                $('#spokenStatus').html('Failed to speak instructions').addClass('spoken-failure').removeClass('spoken-success');
-                            }
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        $('#loading').hide();
-                        $('#captureButton').prop('disabled', false);
-                        $('#result').html('<p>An error occurred: ' + error + '</p>');
-                    }
-                });
+            $('#continuousButton').click(function() {
+                if (continuousProcessRunning) {
+                    continuousProcessRunning = false;
+                    $('#continuousButton').text('Start Continuous (Live Capture)');
+                } else {
+                    continuousProcessRunning = true;
+                    $('#continuousButton').text('Stop Continuous (Live Capture)');
+                    processImage();
+                }
             });
         });
     </script>

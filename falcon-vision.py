@@ -214,6 +214,16 @@ def process_image_route():
     result = process_image()
     return jsonify(result)
 
+@app.route('/continuous_process', methods=['POST'])
+def continuous_process():
+    global continuous_process_running
+    continuous_process_running = True
+    while continuous_process_running:
+        result = process_image(camera_id=0)
+        if result.get("error"):
+            return jsonify(result)
+        return jsonify(result)
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
