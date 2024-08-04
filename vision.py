@@ -6,6 +6,7 @@ import logging
 import subprocess
 from datetime import datetime
 from dotenv import load_dotenv
+import imghdr
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -56,9 +57,13 @@ def check_file_size(file_path):
     return size_mb
 
 def check_image_format(file_path):
-    image_type = imghdr.what(file_path)
-    logger.info(f"Image format: {image_type}")
-    return image_type
+    try:
+        image_type = imghdr.what(file_path)
+        logger.info(f"Image format: {image_type}")
+        return image_type
+    except Exception as e:
+        logger.error(f"Error checking image format: {e}")
+        return None
 
 def resize_and_encode_image(image_path, target_size="512x512"):
     resized_path = image_path.replace('.jpg', '_resized.jpg')
