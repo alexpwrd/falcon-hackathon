@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Falcon Vision Aid</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -78,8 +79,45 @@
                             $('#spokenStatus').html('Failed to speak instructions').addClass('spoken-failure').removeClass('spoken-success');
                         }
                     }
+                },
+                error: function(xhr, status, error) {
+                    $('#loading').hide();
+                    $('#captureButton').prop('disabled', false);
+                    $('#continuousButton').prop('disabled', false);
+                    $('#result').html('<p>An error occurred: ' + error + '</p>');
+                }
+            });
+        }
 
-                    // Callback to continue the process if continuous process is running
+        function processContinuousImage(callback) {
+            $('#result').empty();
+            $('#spokenStatus').empty();
+            $('#resizedImage').hide();
+            $('#loading').show();
+            $('#captureButton').prop('disabled', true);
+            $('#continuousButton').prop('disabled', true);
+
+            $.ajax({
+                url: '/continuous_process',
+                type: 'POST',
+                success: function(response) {
+                    $('#loading').hide();
+                    $('#captureButton').prop('disabled', false);
+                    $('#continuousButton').prop('disabled', false);
+                    if (response.error) {
+                        $('#result').html('<p>Error: ' + response.error + '</p>');
+                    } else {
+                        $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
+                        $('#resizedImage').attr('src', response.resized_image_url).show();
+
+                        if (response.instructions_spoken) {
+                            $('#spokenStatus').html('Instructions were spoken successfully').addClass('spoken-success').removeClass('spoken-failure');
+                        } else {
+                            $('#spokenStatus').html('Failed to speak instructions').addClass('spoken-failure').removeClass('spoken-success');
+                        }
+                    }
+
+                    // Continue the process if continuous process is running
                     if (callback) {
                         callback();
                     }
@@ -90,7 +128,7 @@
                     $('#continuousButton').prop('disabled', false);
                     $('#result').html('<p>An error occurred: ' + error + '</p>');
 
-                    // Callback to continue the process if continuous process is running
+                    // Continue the process if continuous process is running
                     if (callback) {
                         callback();
                     }
@@ -100,7 +138,7 @@
 
         function startContinuousProcess() {
             if (continuousProcessRunning) {
-                processImage(startContinuousProcess);
+                processContinuousImage(startContinuousProcess);
             }
         }
 
