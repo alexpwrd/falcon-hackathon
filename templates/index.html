@@ -119,6 +119,13 @@
             padding-top: 0.2rem;
             font-size: 14px;
         }
+        .footer-buttons {
+            display: flex;
+            align-items: center;
+        }
+        .footer-buttons > * {
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -181,18 +188,65 @@
             <a href="https://github.com/alexpwrd/falcon-hackathon" target="_blank">
                 <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="32" height="32">
             </a>
-            <button id="settingsButton" class="btn btn-link p-0" type="button">
-                <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
-            </button>
-            <div id="settingsDropdown" class="settings-dropdown">
-                <div class="custom-control custom-switch">
-                    <input type="checkbox" class="custom-control-input" id="debugSwitch">
-                    <label class="custom-control-label" for="debugSwitch">Debug Mode</label>
+            <div class="footer-buttons">
+                <!-- 1. Custom Dropdown -->
+                <button id="settingsButton" class="btn btn-link p-0" type="button">
+                    <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
+                </button>
+                <div id="settingsDropdown" class="settings-dropdown">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="debugSwitch1">
+                        <label class="custom-control-label" for="debugSwitch1">Debug Mode (Dropdown)</label>
+                    </div>
                 </div>
-                <!-- Add more toggles here as needed -->
+
+                <!-- 2. Bootstrap Popover -->
+                <button id="popoverButton" class="btn btn-link p-0" type="button" data-toggle="popover" data-placement="top">
+                    <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
+                </button>
+
+                <!-- 3. Bootstrap Modal -->
+                <button id="modalButton" class="btn btn-link p-0" type="button" data-toggle="modal" data-target="#settingsModal">
+                    <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
+                </button>
+
+                <!-- 4. Inline toggle with collapsible section -->
+                <button class="btn btn-link p-0" type="button" data-toggle="collapse" data-target="#inlineSettings" aria-expanded="false" aria-controls="inlineSettings">
+                    <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
+                </button>
             </div>
         </div>
     </footer>
+
+    <!-- Inline collapsible section -->
+    <div class="collapse" id="inlineSettings">
+        <div class="card card-body">
+            <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="debugSwitch4">
+                <label class="custom-control-label" for="debugSwitch4">Debug Mode (Inline)</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="debugSwitch3">
+                        <label class="custom-control-label" for="debugSwitch3">Debug Mode (Modal)</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -270,29 +324,39 @@
                 $(this).closest('.card').find('.card-body').slideToggle();
             });
 
-            // Toggle settings dropdown
+            // 1. Custom Dropdown
             $('#settingsButton').click(function(e) {
                 e.stopPropagation();
                 $('#settingsDropdown').toggle();
             });
 
-            // Close dropdown when clicking outside
             $(document).click(function() {
                 $('#settingsDropdown').hide();
             });
 
-            // Prevent dropdown from closing when clicking inside
             $('#settingsDropdown').click(function(e) {
                 e.stopPropagation();
             });
 
-            // Handle debug switch toggle
-            $('#debugSwitch').on('click', function(e) {
-                e.preventDefault();
+            // 2. Bootstrap Popover
+            $('#popoverButton').popover({
+                html: true,
+                content: function() {
+                    return '<div class="custom-control custom-switch">' +
+                           '<input type="checkbox" class="custom-control-input" id="debugSwitch2">' +
+                           '<label class="custom-control-label" for="debugSwitch2">Debug Mode (Popover)</label>' +
+                           '</div>';
+                }
+            });
+
+            // Handle all debug switches
+            $('body').on('change', '#debugSwitch1, #debugSwitch2, #debugSwitch3, #debugSwitch4', function() {
+                $('.debug-card').toggle(this.checked);
+            });
+
+            // Prevent popover from closing when interacting with its content
+            $('body').on('click', '.popover', function(e) {
                 e.stopPropagation();
-                var isChecked = $(this).prop('checked');
-                $(this).prop('checked', !isChecked);
-                $('.debug-card').toggle(!isChecked);
             });
         });
     </script>
