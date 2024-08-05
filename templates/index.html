@@ -6,28 +6,37 @@
     <title>Falcon Vision Aid</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { font-size: 24px; margin-bottom: 20px; }
         #resizedImage { max-width: 100%; height: auto; margin-top: 20px; }
-        .btn-custom { font-size: 28px; padding: 20px 40px; margin: 15px 0; width: 100%; }
+        .btn-custom { font-size: 24px; padding: 15px 30px; margin: 10px 0; width: 100%; }
         #loading { display: none; margin-top: 20px; }
         #countdown { display: none; margin-top: 10px; font-weight: bold; }
-        .collapse-header { cursor: pointer; margin-top: 20px; font-size: 1.2em; }
+        .collapse-header { cursor: pointer; margin-top: 10px; font-size: 1em; }
         .collapse-header:after { content: ' ▼'; font-size: 0.8em; }
         .collapse-header.active:after { content: ' ▲'; }
-        .collapse-content { display: none; margin-top: 10px; background-color: #f6f8fa; border-radius: 3px; padding: 10px; font-family: monospace; white-space: pre-wrap; }
+        .collapse-content { display: none; margin-top: 5px; background-color: #f6f8fa; border-radius: 3px; padding: 10px; font-family: monospace; white-space: pre-wrap;}
         #modeSelect { font-size: 20px; margin: 15px 0; width: 100%; }
+        .btn-group { width: 100%; }
+        .dropdown-toggle { width: 100%; text-align: left; }
+        .dropdown-toggle::after { float: right; margin-top: 10px; }
     </style>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
     <h1>Falcon Vision Aid</h1>
-    <select id="modeSelect" class="form-control">
-        <option value="live">Live Capture</option>
-        <option value="single">Single Capture</option>
-    </select>
+    <div class="btn-group">
+        <button type="button" class="btn btn-primary dropdown-toggle btn-custom" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span id="selectedMode">Live Capture</span>
+        </button>
+        <div class="dropdown-menu w-100">
+            <a class="dropdown-item" href="#" data-mode="live">Live Capture</a>
+            <a class="dropdown-item" href="#" data-mode="single">Single Capture</a>
+        </div>
+    </div>
     <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">Capture New Image</button>
-    <button id="continuousButton" class="btn btn-secondary btn-custom">Start Live Capture</button>
     <div id="loading">Processing image... Please wait.</div>
     <div id="countdown"></div>
     <div id="result"></div>
@@ -46,8 +55,7 @@
             $('#resizedImage').hide();
             $('#loading').show();
             $('#countdown').hide();
-            $('#captureButton').prop('disabled', true);
-            $('#continuousButton').prop('disabled', true);
+            $('.btn-group').prop('disabled', true);
 
             $.ajax({
                 url: '/process_image',
@@ -55,8 +63,7 @@
                 timeout: 60000, // 60 seconds timeout
                 success: function(response) {
                     $('#loading').hide();
-                    $('#captureButton').prop('disabled', false);
-                    $('#continuousButton').prop('disabled', false);
+                    $('.btn-group').prop('disabled', false);
                     if (response.error) {
                         $('#result').html('<p>Error: ' + response.error + '</p>');
                     } else {
@@ -77,14 +84,13 @@
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     $('#loading').hide();
-                    $('#captureButton').prop('disabled', false);
-                    $('#continuousButton').prop('disabled', false);
+                    $('.btn-group').prop('disabled', false);
                     $('#result').html('<p>Error: Failed to process image. Please try again.</p>');
                     console.error('Error:', textStatus, errorThrown);
                 },
                 complete: function() {
                     if (isContinuous && continuousProcessRunning) {
-                        let countdown = 3; // Changed from 5 to 3
+                        let countdown = 3;
                         updateCountdown(countdown);
                         countdownInterval = setInterval(() => {
                             countdown--;
@@ -101,32 +107,36 @@
         }
 
         $(document).ready(function() {
-            $('#captureButton').click(() => processImage(false));
-
-            $('#continuousButton').click(function() {
-                continuousProcessRunning = !continuousProcessRunning;
-                if (continuousProcessRunning) {
-                    $(this).text('Stop Live Capture').removeClass('btn-secondary').addClass('btn-danger');
-                    processImage(true);
-                } else {
-                    $(this).text('Start Live Capture').removeClass('btn-danger').addClass('btn-secondary');
+            $('.dropdown-item').click(function(e) {
+                e.preventDefault();
+                let mode = $(this).data('mode');
+                $('#selectedMode').text($(this).text());
+                if (mode === 'single') {
+                    continuousProcessRunning = false;
                     clearInterval(countdownInterval);
                     $('#countdown').hide();
-                }
-            });
-
-            $('#modeSelect').change(function() {
-                if ($(this).val() === 'single') {
-                    $('#captureButton').show();
-                    $('#continuousButton').hide();
+                    $('.btn-group .btn').text('Capture New Image').removeClass('btn-secondary btn-danger').addClass('btn-primary');
                 } else {
-                    $('#captureButton').hide();
-                    $('#continuousButton').show();
+                    $('.btn-group .btn').text('Start Live Capture').removeClass('btn-primary btn-danger').addClass('btn-secondary');
                 }
             });
 
-            // Set initial button visibility
-            $('#modeSelect').trigger('change');
+            $('.btn-group .btn').click(function() {
+                let mode = $('#selectedMode').text();
+                if (mode === 'Single Capture') {
+                    processImage(false);
+                } else {
+                    continuousProcessRunning = !continuousProcessRunning;
+                    if (continuousProcessRunning) {
+                        $(this).text('Stop Live Capture').removeClass('btn-secondary').addClass('btn-danger');
+                        processImage(true);
+                    } else {
+                        $(this).text('Start Live Capture').removeClass('btn-danger').addClass('btn-secondary');
+                        clearInterval(countdownInterval);
+                        $('#countdown').hide();
+                    }
+                }
+            });
         });
     </script>
 </body>
