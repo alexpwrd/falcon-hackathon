@@ -291,11 +291,6 @@
                 $('.debug-card').toggle(this.checked);
             });
 
-            // Prevent popover from closing when interacting with its content
-            $('body').on('click', '.popover', function(e) {
-                e.stopPropagation();
-            });
-
             // Prevent the dropdown item from being selected when clicking the switch
             $('.custom-switch').on('click', function(e) {
                 e.preventDefault();
@@ -306,6 +301,11 @@
                 e.stopPropagation();
                 $(this).prop('checked', !$(this).prop('checked'));
                 $(this).trigger('change');
+            });
+
+            // Prevent popover from closing when interacting with its content
+            $('body').on('click', '.popover', function(e) {
+                e.stopPropagation();
             });
 
             $('.dropdown-item').click(function(e) {
