@@ -51,10 +51,21 @@
     <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
 
     <script>
-        const socket = io();
+        const socket = io('http://127.0.0.1:5001', {
+            transports: ['websocket']
+        });
+
+        socket.on('connect', function() {
+            console.log('Connected to server');
+        });
+
         socket.on('connect_error', (error) => {
-            console.log('Connection Error:', error);
+            console.error('Connection Error:', error);
             $('#result').html('<p>Error connecting to server. Please check your connection and try again.</p>');
+        });
+
+        socket.on('error', (error) => {
+            console.error('Socket Error:', error);
         });
 
         let continuousProcessRunning = false;

@@ -8,6 +8,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import imghdr
 from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask_cors import CORS
 import threading
 from flask_socketio import SocketIO
 import time
@@ -42,9 +43,9 @@ FALCON_HEADERS = {
 }
 
 app = Flask(__name__)
+CORS(app)  # Add this line to enable CORS
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
-socketio = SocketIO(app)
-
+socketio = SocketIO(app, cors_allowed_origins="*")  # Update this line
 continuous_process_running = False
 
 def take_photo(camera_id=0, filename='visionAId.jpg', filepath='/data/data/com.termux/files/home/storage/dcim/', resolution='800x600'):
@@ -83,8 +84,8 @@ def resize_and_encode_image(image_path, target_size="512x512"):
         # Ensure the upload folder exists
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
         
-        # Resize image using ImageMagick's convert command (note: 'magick' might not be needed in Termux)
-        subprocess.run(['convert', image_path, '-resize', target_size+'^', '-gravity', 'center', '-extent', target_size, resized_path], check=True)
+        # Resize image using ImageMagick's magick command
+        subprocess.run(['magick', image_path, '-resize', target_size+'^', '-gravity', 'center', '-extent', target_size, resized_path], check=True)
         logger.info(f"Image resized and saved to {resized_path}")
         
         # Read and encode the resized image
