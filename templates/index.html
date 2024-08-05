@@ -211,7 +211,9 @@
         function processImage(isContinuous = false) {
             $('#systemMessage').text('Processing image... Please wait.');
             $('#captureButton').prop('disabled', true);
-            $('#liveCaptureButton').prop('disabled', false);
+            $('#liveCaptureButton').prop('disabled', true);
+            $('#resizedImage').hide();
+            $('#noImage').show();
 
             $.ajax({
                 url: '/process_image',
@@ -219,6 +221,7 @@
                 timeout: 60000,
                 success: function(response) {
                     $('#captureButton').prop('disabled', false);
+                    $('#liveCaptureButton').prop('disabled', false);
                     if (response.error) {
                         $('#systemMessage').text('Error: ' + response.error);
                     } else {
@@ -227,16 +230,19 @@
                             $('#imageDescription').text(response.description);
                         }
                         if (response.instructions) {
-                            $('#instructions').text(response.instructions.trim());
+                            $('#instructions').text(response.instructions);
                         }
                         if (response.resized_image_url) {
                             $('#resizedImage').attr('src', response.resized_image_url).show();
                             $('#noImage').hide();
                         }
+                        // Show the card bodies
+                        $('.card-body').show();
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     $('#captureButton').prop('disabled', false);
+                    $('#liveCaptureButton').prop('disabled', false);
                     $('#systemMessage').text('Error: Failed to process image. Please try again.');
                     console.error('Error:', textStatus, errorThrown);
                 },
