@@ -42,10 +42,10 @@ app = Flask(__name__)
 CORS(app)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
-def take_photo(camera_id=1, filename='visionAId.jpg', filepath='~/storage/dcim/', resolution='800x600'):
+def take_photo(camera_id=0, filename='visionAId.jpg', filepath='~/storage/dcim/', resolution='800x600'):
     _path = os.path.join(filepath, filename)
     _path = os.path.expanduser(_path)  # Expand the ~ in the filepath
-    logger.info(f"Taking photo with camera ID {camera_id}")
+    logger.info(f"Taking photo with camera ID {camera_id} (back camera)")
     logger.info(f"Saving photo to {_path}")
     cmd = f"termux-camera-photo -c {camera_id} {_path}"
     try:
@@ -85,7 +85,7 @@ def resize_and_encode_image(image_path, target_size="512x512"):
         # Read and encode the resized image
         with open(resized_path, "rb") as image_file:
             encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
-        logger.info(f"Image encoded successfully. Encoded length: {len(encoded_image)}")
+        logger.info("Image encoded successfully")
         return encoded_image, resized_filename
     except subprocess.CalledProcessError as e:
         logger.error(f"Error resizing image: {e}")
@@ -124,7 +124,7 @@ def generate_image_description(image_path):
         ]
     }
     
-    logger.info(f"Sending request to OpenAI API. Payload size: {len(json.dumps(payload))} bytes")
+    logger.info("Sending request to OpenAI API")
     
     try:
         response = requests.post(OPENAI_API_URL, headers=OPENAI_HEADERS, json=payload)
@@ -165,6 +165,7 @@ def generate_instructions(image_description):
 def speak_text(text):
     try:
         subprocess.run(['termux-tts-speak', text], check=True)
+        logger.info(f"Text spoken successfully: {text[:50]}...")
         return True
     except subprocess.CalledProcessError as e:
         logger.error(f"Error speaking text: {e}")
@@ -176,27 +177,44 @@ def index():
 
 @app.route('/process_image', methods=['POST'])
 def process_image():
-    image_path = take_photo()
-    if not image_path:
-        return jsonify({"error": "Failed to take photo"})
-    
-    base64_image, resized_filename = resize_and_encode_image(image_path)
-    if not base64_image:
-        return jsonify({"error": "Failed to process image"})
-    
-    description = generate_image_description(base64_image)
-    instructions = generate_instructions(description)
-    speak_text(instructions)
-    
-    return jsonify({
-        "description": description,
-        "instructions": instructions,
-        "resized_image_url": f"/uploads/{resized_filename}?t={datetime.now().timestamp()}"
-    })
+    image_path = take_photo(camera_id=0)  # Use back camera (camera_id=0)
+    if image_path and os.path.exists(image_path):
+        file_size_mb = check_file_size(image_path)
+        image_format = check_image_format(image_path)
+        
+        logger.info(f"Original image size: {file_size_mb:.2f} MB")
+        logger.info(f"Original image format: {image_format}")
+        
+        image_description, resized_filename = generate_image_description(image_path)
+        if resized_filename is None:
+            return jsonify({"error": "Failed to resize and encode image"})
+        
+        resized_path = os.path.join(app.config['UPLOAD_FOLDER'], resized_filename)
+        
+        # Check size of resized image
+        resized_size_mb = check_file_size(resized_path)
+        logger.info(f"Resized image size: {resized_size_mb:.2f} MB")
+        
+        instructions = generate_instructions(image_description)
+        logger.info(f"Full image description: {image_description}")
+        logger.info(f"Full instructions: {instructions}")
+        
+        # Speak the Falcon instructions and get the result
+        instructions_spoken = speak_text(instructions)
+        
+        return jsonify({
+            "description": image_description, 
+            "instructions": instructions,
+            "resized_image_url": f"/uploads/{resized_filename}?t={datetime.now().timestamp()}",
+            "instructions_spoken": instructions_spoken
+        })
+    else:
+        logger.error("Failed to take photo or photo file not found")
+        return jsonify({"error": "Failed to take photo or photo file not found"})
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)

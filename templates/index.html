@@ -24,7 +24,7 @@
     <script>
         let continuousProcessRunning = false;
 
-        function processImage() {
+        function processImage(isContinuous = false) {
             $('#result').empty();
             $('#resizedImage').hide();
             $('#loading').show();
@@ -42,20 +42,20 @@
                     $('#resizedImage').attr('src', response.resized_image_url).show();
                 }
 
-                if (continuousProcessRunning) {
-                    setTimeout(processImage, 5000); // Wait 5 seconds before next capture
+                if (isContinuous && continuousProcessRunning) {
+                    setTimeout(() => processImage(true), 5000); // Wait 5 seconds before next capture
                 }
             });
         }
 
         $(document).ready(function() {
-            $('#captureButton').click(processImage);
+            $('#captureButton').click(() => processImage(false));
 
             $('#continuousButton').click(function() {
                 continuousProcessRunning = !continuousProcessRunning;
                 if (continuousProcessRunning) {
                     $(this).text('Stop Continuous Capture').removeClass('btn-secondary').addClass('btn-danger');
-                    processImage();
+                    processImage(true);
                 } else {
                     $(this).text('Start Continuous Capture').removeClass('btn-danger').addClass('btn-secondary');
                 }
