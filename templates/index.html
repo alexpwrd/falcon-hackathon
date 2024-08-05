@@ -113,12 +113,18 @@
                             '<div id="instructions" class="collapse-content">' + response.instructions + '</div>'
                         );
                         if (response.resized_image_url) {
-                            $('#resizedImage').attr('src', response.resized_image_url).show();
+                            $('#resizedImage').attr('src', response.resized_image_url + '?t=' + new Date().getTime()).show();
                         }
                         $('.collapse-header').click(function() {
                             $(this).toggleClass('active');
                             $($(this).data('target')).slideToggle();
                         });
+
+                        // Trigger audio description
+                        if (response.instructions_spoken) {
+                            let audio = new Audio(response.instructions_spoken);
+                            audio.play();
+                        }
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
