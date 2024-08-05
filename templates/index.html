@@ -52,7 +52,7 @@
     <script>
         let continuousProcessRunning = false;
 
-        function processImage(callback) {
+        function processImage(url, callback) {
             $('#result').empty();
             $('#spokenStatus').empty();
             $('#resizedImage').hide();
@@ -61,44 +61,7 @@
             $('#continuousButton').prop('disabled', true);
 
             $.ajax({
-                url: '/process_image',
-                type: 'POST',
-                success: function(response) {
-                    $('#loading').hide();
-                    $('#captureButton').prop('disabled', false);
-                    $('#continuousButton').prop('disabled', false);
-                    if (response.error) {
-                        $('#result').html('<p>Error: ' + response.error + '</p>');
-                    } else {
-                        $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
-                        $('#resizedImage').attr('src', response.resized_image_url).show();
-
-                        if (response.instructions_spoken) {
-                            $('#spokenStatus').html('Instructions were spoken successfully').addClass('spoken-success').removeClass('spoken-failure');
-                        } else {
-                            $('#spokenStatus').html('Failed to speak instructions').addClass('spoken-failure').removeClass('spoken-success');
-                        }
-                    }
-                },
-                error: function(xhr, status, error) {
-                    $('#loading').hide();
-                    $('#captureButton').prop('disabled', false);
-                    $('#continuousButton').prop('disabled', false);
-                    $('#result').html('<p>An error occurred: ' + error + '</p>');
-                }
-            });
-        }
-
-        function processContinuousImage(callback) {
-            $('#result').empty();
-            $('#spokenStatus').empty();
-            $('#resizedImage').hide();
-            $('#loading').show();
-            $('#captureButton').prop('disabled', true);
-            $('#continuousButton').prop('disabled', true);
-
-            $.ajax({
-                url: '/continuous_process',
+                url: url,
                 type: 'POST',
                 success: function(response) {
                     $('#loading').hide();
@@ -117,7 +80,7 @@
                         }
                     }
 
-                    // Continue the process if continuous process is running
+                    // Callback to continue the process if continuous process is running
                     if (callback) {
                         callback();
                     }
@@ -128,7 +91,7 @@
                     $('#continuousButton').prop('disabled', false);
                     $('#result').html('<p>An error occurred: ' + error + '</p>');
 
-                    // Continue the process if continuous process is running
+                    // Callback to continue the process if continuous process is running
                     if (callback) {
                         callback();
                     }
@@ -138,13 +101,13 @@
 
         function startContinuousProcess() {
             if (continuousProcessRunning) {
-                processContinuousImage(startContinuousProcess);
+                processImage('/process_image', startContinuousProcess);
             }
         }
 
         $(document).ready(function() {
             $('#captureButton').click(function() {
-                processImage();
+                processImage('/process_image');
             });
 
             $('#continuousButton').click(function() {
