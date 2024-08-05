@@ -40,7 +40,7 @@ FALCON_HEADERS = {
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
-def take_photo(camera_id=1, filename='visionAId.jpg', filepath='~/storage/dcim/', resolution='800x600'):
+def take_photo(camera_id=0, filename='visionAId.jpg', filepath='~/storage/dcim/', resolution='800x600'):
     _path = os.path.join(filepath, filename)
     _path = os.path.expanduser(_path)  # Expand the ~ in the filepath
     logger.info(f"Taking photo with camera ID {camera_id}")
@@ -219,7 +219,7 @@ def continuous_process():
     global continuous_process_running
     continuous_process_running = True
     while continuous_process_running:
-        result = process_image(camera_id=0)
+        result = process_image()
         if result.get("error"):
             return jsonify(result)
         return jsonify(result)
