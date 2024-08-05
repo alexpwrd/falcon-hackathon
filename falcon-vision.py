@@ -8,8 +8,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 import imghdr
 from flask import Flask, render_template, jsonify, request, send_from_directory
-import threading
-from flask_socketio import SocketIO # pip install flask-socketio
+import threading # pip install
+from flask_socketio import SocketIO
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -41,6 +41,7 @@ FALCON_HEADERS = {
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+socketio = SocketIO(app)
 
 def take_photo(camera_id=0, filename='visionAId.jpg', filepath='~/storage/dcim/', resolution='800x600'):
     _path = os.path.join(filepath, filename)
@@ -216,20 +217,17 @@ def process_image_route():
     result = process_image()
     return jsonify(result)
 
-# @app.route('/continuous_process', methods=['POST'])
-# def continuous_process():
-#     global continuous_process_running
-#     continuous_process_running = True
-#     while continuous_process_running:
-#         result = process_image()
-#         if result.get("error"):
-#             return jsonify(result)
-#         return jsonify(result)
-
 @app.route('/continuous_process', methods=['POST'])
 def continuous_process():
     global continuous_process_running
     continuous_process_running = True
+    def run_continuous_process():
+        while continuous_process_running:
+            result = process_image()
+            if result.get("error"):
+                return jsonify(result)
+            socketio.emit('continuous_result', result)
+    threading.Thread(target=run_continuous_process).start()
     return jsonify({"status": "Continuous process started"})
 
 @app.route('/stop_continuous_process', methods=['POST'])
@@ -238,17 +236,10 @@ def stop_continuous_process():
     continuous_process_running = False
     return jsonify({"status": "Continuous process stopped"})
 
-@app.route('/check_continuous_process', methods=['POST'])
-def check_continuous_process():
-    if continuous_process_running:
-        result = process_image()
-        return jsonify(result)
-    else:
-        return jsonify({"status": "Continuous process not running"})
-
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    # app.run(host='0.0.0.0', port=5001, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5001, debug=True)

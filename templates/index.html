@@ -6,6 +6,7 @@
     <title>Falcon Vision Aid</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -50,6 +51,8 @@
     <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
 
     <script>
+        const socket = io();
+
         let continuousProcessRunning = false;
 
         function processImage(url, callback) {
@@ -99,29 +102,9 @@
             });
         }
 
-        function checkContinuousProcess() {
+        function startContinuousProcess() {
             if (continuousProcessRunning) {
-                $.ajax({
-                    url: '/check_continuous_process',
-                    type: 'POST',
-                    success: function(response) {
-                        if (response.status !== "Continuous process not running") {
-                            $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
-                            $('#resizedImage').attr('src', response.resized_image_url).show();
-
-                            if (response.instructions_spoken) {
-                                $('#spokenStatus').html('Instructions were spoken successfully').addClass('spoken-success').removeClass('spoken-failure');
-                            } else {
-                                $('#spokenStatus').html('Failed to speak instructions').addClass('spoken-failure').removeClass('spoken-success');
-                            }
-                        }
-                    },
-                    complete: function() {
-                        if (continuousProcessRunning) {
-                            setTimeout(checkContinuousProcess, 5000); // Check every 5 seconds
-                        }
-                    }
-                });
+                processImage('/process_image', startContinuousProcess);
             }
         }
 
@@ -139,7 +122,25 @@
                     continuousProcessRunning = true;
                     $.post('/continuous_process');
                     $('#continuousButton').text('Stop Live Capture').removeClass('btn-secondary').addClass('btn-danger');
-                    checkContinuousProcess();
+                    startContinuousProcess();
+                }
+            });
+
+            socket.on('continuous_result', function(response) {
+                $('#loading').hide();
+                $('#captureButton').prop('disabled', false);
+                $('#continuousButton').prop('disabled', false);
+                if (response.error) {
+                    $('#result').html('<p>Error: ' + response.error + '</p>');
+                } else {
+                    $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
+                    $('#resizedImage').attr('src', response.resized_image_url).show();
+
+                    if (response.instructions_spoken) {
+                        $('#spokenStatus').html('Instructions were spoken successfully').addClass('spoken-success').removeClass('spoken-failure');
+                    } else {
+                        $('#spokenStatus').html('Failed to speak instructions').addClass('spoken-failure').removeClass('spoken-success');
+                    }
                 }
             });
         });
