@@ -249,6 +249,23 @@
                 $('.debug-card').toggle(this.checked);
             });
 
+            // Prevent dropdown from closing when clicking on the switch
+            $('.dropdown-menu').on('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // Prevent the dropdown item from being selected when clicking the switch
+            $('.custom-switch').on('click', function(e) {
+                e.preventDefault();
+            });
+
+            // Handle the switch toggle separately
+            $('.custom-control-input').on('click', function(e) {
+                e.stopPropagation();
+                $(this).prop('checked', !$(this).prop('checked'));
+                $(this).trigger('change');
+            });
+
             $('.dropdown-item').click(function(e) {
                 e.preventDefault();
                 let mode = $(this).data('mode');
@@ -260,11 +277,6 @@
                     $('#captureButton').hide();
                     $('#liveCaptureButton').show();
                 }
-            });
-
-            // Prevent dropdown from closing when clicking on the switch
-            $('.dropdown-menu').on('click', function(e) {
-                e.stopPropagation();
             });
         });
     </script>
