@@ -71,7 +71,7 @@
             text-align: center;
             flex-grow: 1;
         }
-        .dropdown-menu { font-size: 10px; }
+        .dropdown-menu { font-size: 14px; }
         .footer {
             background-color: #f8f9fa;
             padding: 10px 0;
@@ -88,6 +88,9 @@
             margin: 0 auto;
             padding: 0 20px;
         }
+        .dropdown-item { padding: 0.5rem 1rem; }
+        .custom-switch { padding-left: 2.25rem; }
+        .custom-control-label { padding-top: 0.2rem; }
     </style>
 </head>
 <body>
@@ -257,6 +260,11 @@
                     $('#captureButton').hide();
                     $('#liveCaptureButton').show();
                 }
+            });
+
+            // Prevent dropdown from closing when clicking on the switch
+            $('.dropdown-menu').on('click', function(e) {
+                e.stopPropagation();
             });
         });
     </script>
