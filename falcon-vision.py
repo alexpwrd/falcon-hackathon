@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 import imghdr
 from flask import Flask, render_template, jsonify, request, send_from_directory
 import threading
+from flask_socketio import SocketIO
+import time
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -40,6 +42,7 @@ FALCON_HEADERS = {
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+socketio = SocketIO(app)
 
 continuous_process_running = False
 
@@ -221,12 +224,16 @@ def process_image_route():
 def continuous_process():
     global continuous_process_running
     continuous_process_running = True
+
     def run_continuous_process():
         while continuous_process_running:
             result = process_image()
             if result.get("error"):
-                return jsonify(result)
+                socketio.emit('continuous_result', result)
+                break
             socketio.emit('continuous_result', result)
+            time.sleep(5)  # Sleep for 5 seconds before capturing the next image
+
     threading.Thread(target=run_continuous_process).start()
     return jsonify({"status": "Continuous process started"})
 
@@ -241,6 +248,4 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == "__main__":
-    from flask_socketio import SocketIO
-    socketio = SocketIO(app)
     socketio.run(app, host='0.0.0.0', port=5001, debug=True)
