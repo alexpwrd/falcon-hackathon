@@ -65,7 +65,10 @@
             flex-direction: column; 
         }
         .card-body { display: none; }
+        .debug-card { display: none; }
+        .debug-card.active { display: block; }
         .debug-card.active .card-body { display: block; }
+        .debug-card.active .card-header.dropdown-toggle + .card-body { display: none; }
         .header {
             position: fixed;
             top: 0;
@@ -266,10 +269,6 @@
 
         function updateSystemMessage(message) {
             $('#systemMessage').text(message);
-            // Ensure the system message is visible if debug mode is active
-            if ($('#debugSwitch').is(':checked')) {
-                $('#systemMessage').closest('.card-body').show();
-            }
         }
 
         $(document).ready(function() {
@@ -337,6 +336,14 @@
 
             $('#debugSwitch').change(function() {
                 $('.debug-card').toggleClass('active', this.checked);
+                if (this.checked) {
+                    $('.debug-card .card-body').show();
+                    $('.debug-card .card-header.dropdown-toggle + .card-body').hide();
+                }
+            });
+
+            $('.debug-card .card-header.dropdown-toggle').click(function() {
+                $(this).next('.card-body').slideToggle();
             });
 
             // Initially hide debug cards
