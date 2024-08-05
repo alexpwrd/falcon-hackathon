@@ -11,6 +11,7 @@
         #resizedImage { max-width: 100%; height: auto; margin-top: 20px; }
         .btn-custom { font-size: 18px; padding: 10px 20px; margin: 5px 0; width: 100%; }
         #loading { display: none; margin-top: 20px; }
+        #countdown { display: none; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -18,32 +19,64 @@
     <button id="captureButton" class="btn btn-primary btn-custom">Capture New Image</button>
     <button id="continuousButton" class="btn btn-secondary btn-custom">Start Continuous Capture</button>
     <div id="loading">Processing image... Please wait.</div>
+    <div id="countdown"></div>
     <div id="result"></div>
     <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
 
     <script>
         let continuousProcessRunning = false;
+        let countdownInterval;
+
+        function updateCountdown(seconds) {
+            $('#countdown').text(`Next capture in ${seconds} seconds`).show();
+        }
 
         function processImage(isContinuous = false) {
             $('#result').empty();
             $('#resizedImage').hide();
             $('#loading').show();
+            $('#countdown').hide();
             $('#captureButton').prop('disabled', true);
             $('#continuousButton').prop('disabled', true);
 
-            $.post('/process_image', function(response) {
-                $('#loading').hide();
-                $('#captureButton').prop('disabled', false);
-                $('#continuousButton').prop('disabled', false);
-                if (response.error) {
-                    $('#result').html('<p>Error: ' + response.error + '</p>');
-                } else {
-                    $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
-                    $('#resizedImage').attr('src', response.resized_image_url).show();
-                }
-
-                if (isContinuous && continuousProcessRunning) {
-                    setTimeout(() => processImage(true), 5000); // Wait 5 seconds before next capture
+            $.ajax({
+                url: '/process_image',
+                method: 'POST',
+                timeout: 60000, // 60 seconds timeout
+                success: function(response) {
+                    $('#loading').hide();
+                    $('#captureButton').prop('disabled', false);
+                    $('#continuousButton').prop('disabled', false);
+                    if (response.error) {
+                        $('#result').html('<p>Error: ' + response.error + '</p>');
+                    } else {
+                        $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
+                        if (response.resized_image_url) {
+                            $('#resizedImage').attr('src', response.resized_image_url).show();
+                        }
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $('#loading').hide();
+                    $('#captureButton').prop('disabled', false);
+                    $('#continuousButton').prop('disabled', false);
+                    $('#result').html('<p>Error: Failed to process image. Please try again.</p>');
+                    console.error('Error:', textStatus, errorThrown);
+                },
+                complete: function() {
+                    if (isContinuous && continuousProcessRunning) {
+                        let countdown = 5;
+                        updateCountdown(countdown);
+                        countdownInterval = setInterval(() => {
+                            countdown--;
+                            if (countdown > 0) {
+                                updateCountdown(countdown);
+                            } else {
+                                clearInterval(countdownInterval);
+                                processImage(true);
+                            }
+                        }, 1000);
+                    }
                 }
             });
         }
@@ -58,6 +91,8 @@
                     processImage(true);
                 } else {
                     $(this).text('Start Continuous Capture').removeClass('btn-danger').addClass('btn-secondary');
+                    clearInterval(countdownInterval);
+                    $('#countdown').hide();
                 }
             });
         });

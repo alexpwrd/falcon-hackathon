@@ -177,6 +177,7 @@ def index():
 
 @app.route('/process_image', methods=['POST'])
 def process_image():
+    logger.info("Starting image processing")
     image_path = take_photo(camera_id=0)  # Use back camera (camera_id=0)
     if image_path and os.path.exists(image_path):
         file_size_mb = check_file_size(image_path)
@@ -187,6 +188,7 @@ def process_image():
         
         image_description, resized_filename = generate_image_description(image_path)
         if resized_filename is None:
+            logger.error("Failed to resize and encode image")
             return jsonify({"error": "Failed to resize and encode image"})
         
         resized_path = os.path.join(app.config['UPLOAD_FOLDER'], resized_filename)
@@ -202,6 +204,7 @@ def process_image():
         # Speak the Falcon instructions and get the result
         instructions_spoken = speak_text(instructions)
         
+        logger.info("Image processing completed successfully")
         return jsonify({
             "description": image_description, 
             "instructions": instructions,
@@ -217,4 +220,5 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == "__main__":
+    logger.info("Starting Falcon Vision Aid application")
     app.run(host='0.0.0.0', port=5001, debug=True)
