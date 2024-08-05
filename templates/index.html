@@ -320,8 +320,15 @@
             $('#debugSwitch').change(function() {
                 $('.debug-card').toggleClass('active', this.checked);
                 if (this.checked) {
-                    $('.debug-card .card-body').hide();
+                    // Show all debug cards
+                    $('.debug-card').show();
+                    // Show system message card body
                     $('.debug-card:not(.dropdown-toggle) .card-body').show();
+                    // Collapse image description and instructions cards
+                    $('.debug-card.dropdown-toggle .card-body').hide();
+                } else {
+                    // Hide all debug cards when debug mode is off
+                    $('.debug-card').hide();
                 }
             });
 
@@ -330,7 +337,7 @@
             });
 
             // Initially hide debug cards
-            $('.debug-card').removeClass('active');
+            $('.debug-card').hide();
 
             // Ensure the image card is always visible
             $('.card:not(.debug-card)').show().find('.card-body').show();
@@ -338,7 +345,8 @@
             // Ensure system message card body is always visible when debug mode is on
             $('#debugSwitch').change(function() {
                 if (this.checked) {
-                    $('.debug-card.active:not(.dropdown-toggle) .card-body').show();
+                    // Show system message card body
+                    $('.debug-card:not(.dropdown-toggle) .card-body').show();
                 }
             });
 
