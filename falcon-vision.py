@@ -230,16 +230,6 @@ def process_image_route():
 def continuous_process():
     global continuous_process_running
     continuous_process_running = True
-
-    def run_continuous_process():
-        while continuous_process_running:
-            result = process_image()
-            if result.get("error"):
-                return jsonify(result)
-            # Send the result back to the client
-            socketio.emit('continuous_result', result)
-
-    threading.Thread(target=run_continuous_process).start()
     return jsonify({"status": "Continuous process started"})
 
 @app.route('/stop_continuous_process', methods=['POST'])
@@ -247,6 +237,14 @@ def stop_continuous_process():
     global continuous_process_running
     continuous_process_running = False
     return jsonify({"status": "Continuous process stopped"})
+
+@app.route('/check_continuous_process', methods=['POST'])
+def check_continuous_process():
+    if continuous_process_running:
+        result = process_image()
+        return jsonify(result)
+    else:
+        return jsonify({"status": "Continuous process not running"})
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
