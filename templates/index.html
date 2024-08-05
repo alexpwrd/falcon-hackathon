@@ -137,14 +137,14 @@
                 </button>
                 <div class="dropdown-menu" aria-labelledby="modeDropdown">
                     <a class="dropdown-item" href="#" data-mode="single">Single</a>
-                    <a class="dropdown-item" href="#" data-mode="live">Live</a>
+                    <a class="dropdown-item active" href="#" data-mode="live">Live</a>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="content-wrapper">
-        <button id="captureButton" class="btn btn-primary btn-custom">Capture New Image</button>
+        <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">Capture New Image</button>
         <button id="liveCaptureButton" class="btn btn-success btn-custom">Start Live Capture</button>
         
         <div id="output-container">
@@ -249,11 +249,20 @@
         }
 
         $(document).ready(function() {
+            // Set initial mode to 'Live'
+            setMode('live');
+
             // Mode selection in header
             $('.dropdown-item').click(function(e) {
                 e.preventDefault();
                 let mode = $(this).data('mode');
+                setMode(mode);
+            });
+
+            function setMode(mode) {
                 $('#modeDropdown').text(mode.charAt(0).toUpperCase() + mode.slice(1));
+                $('.dropdown-item').removeClass('active');
+                $(`.dropdown-item[data-mode="${mode}"]`).addClass('active');
                 if (mode === 'single') {
                     $('#captureButton').show();
                     $('#liveCaptureButton').hide();
@@ -262,7 +271,7 @@
                     $('#captureButton').hide();
                     $('#liveCaptureButton').show();
                 }
-            });
+            }
 
             $('#captureButton').click(() => processImage(false));
 
