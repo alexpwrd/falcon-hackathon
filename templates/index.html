@@ -91,6 +91,12 @@
         .dropdown-item { padding: 0.5rem 1rem; }
         .custom-switch { padding-left: 2.25rem; }
         .custom-control-label { padding-top: 0.2rem; }
+        .popover {
+            max-width: 300px;
+        }
+        .popover-body {
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -153,19 +159,9 @@
             <a href="https://github.com/alexpwrd/falcon-hackathon" target="_blank">
                 <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="32" height="32">
             </a>
-            <div class="dropup">
-                <button class="btn btn-link p-0" type="button" id="settingsDropup" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
-                </button>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="settingsDropup">
-                    <div class="dropdown-item">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="debugSwitch">
-                            <label class="custom-control-label" for="debugSwitch">Debug Mode</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <button id="settingsButton" class="btn btn-link p-0" type="button" data-toggle="popover" data-placement="top">
+                <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
+            </button>
         </div>
     </footer>
 
@@ -245,12 +241,24 @@
                 $(this).closest('.card').find('.card-body').slideToggle();
             });
 
-            $('#debugSwitch').change(function() {
+            // Initialize popover
+            $('#settingsButton').popover({
+                html: true,
+                content: function() {
+                    return '<div class="custom-control custom-switch">' +
+                           '<input type="checkbox" class="custom-control-input" id="debugSwitch">' +
+                           '<label class="custom-control-label" for="debugSwitch">Debug Mode</label>' +
+                           '</div>';
+                }
+            });
+
+            // Handle debug switch toggle
+            $('body').on('change', '#debugSwitch', function() {
                 $('.debug-card').toggle(this.checked);
             });
 
-            // Prevent dropdown from closing when clicking on the switch
-            $('.dropdown-menu').on('click', function(e) {
+            // Prevent popover from closing when interacting with its content
+            $('body').on('click', '.popover', function(e) {
                 e.stopPropagation();
             });
 
