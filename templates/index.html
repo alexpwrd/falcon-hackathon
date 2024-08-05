@@ -341,6 +341,20 @@
                     $('.debug-card.active:not(.dropdown-toggle) .card-body').show();
                 }
             });
+
+            // Add back the gear menu functionality
+            $('#settingsButton').click(function(e) {
+                e.stopPropagation();
+                $('#settingsDropdown').toggle();
+            });
+
+            $(document).click(function() {
+                $('#settingsDropdown').hide();
+            });
+
+            $('#settingsDropdown').click(function(e) {
+                e.stopPropagation();
+            });
         });
     </script>
 </body>
