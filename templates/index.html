@@ -149,19 +149,19 @@
         
         <div id="output-container">
             <div class="card">
+                <div class="card-header">System Message</div>
+                <div class="card-body" style="display: block;">
+                    <div id="systemMessage" class="code-block">waiting ...</div>
+                </div>
+            </div>
+
+            <div class="card">
                 <div class="card-header">Image</div>
                 <div class="card-body" style="display: block;">
                     <div id="imageContainer">
                         <div id="noImage" class="code-block">...</div>
                         <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
                     </div>
-                </div>
-            </div>
-
-            <div class="card debug-card" style="display: none;">
-                <div class="card-header">System Message</div>
-                <div class="card-body" style="display: block;">
-                    <div id="systemMessage" class="code-block">waiting ...</div>
                 </div>
             </div>
 
@@ -209,23 +209,26 @@
         }
 
         function processImage(isContinuous = false) {
-            $('#resizedImage').hide();
-            $('#noImage').show();
             $('#systemMessage').text('Processing image... Please wait.');
-            $('#captureButton, #liveCaptureButton').prop('disabled', true);
+            $('#captureButton').prop('disabled', true);
+            $('#liveCaptureButton').prop('disabled', false); // Ensure stop button is clickable
 
             $.ajax({
                 url: '/process_image',
                 method: 'POST',
                 timeout: 60000, // 60 seconds timeout
                 success: function(response) {
-                    $('#captureButton, #liveCaptureButton').prop('disabled', false);
+                    $('#captureButton').prop('disabled', false);
                     if (response.error) {
                         $('#systemMessage').text('Error: ' + response.error);
                     } else {
                         $('#systemMessage').text('Done');
-                        $('#imageDescription').text(response.description);
-                        $('#instructions').text(response.instructions.trim());
+                        if (response.description) {
+                            $('#imageDescription').text(response.description);
+                        }
+                        if (response.instructions) {
+                            $('#instructions').text(response.instructions.trim());
+                        }
                         if (response.resized_image_url) {
                             $('#resizedImage').attr('src', response.resized_image_url).show();
                             $('#noImage').hide();
@@ -233,7 +236,7 @@
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    $('#captureButton, #liveCaptureButton').prop('disabled', false);
+                    $('#captureButton').prop('disabled', false);
                     $('#systemMessage').text('Error: Failed to process image. Please try again.');
                     console.error('Error:', textStatus, errorThrown);
                 },
@@ -296,7 +299,6 @@
                 if (!continuousProcessRunning) {
                     continuousProcessRunning = true;
                     $(this).text('Stop Live Capture').removeClass('btn-success').addClass('btn-danger');
-                    $('#systemMessage').text('Processing image... Please wait.');
                     processImage(true);
                 } else {
                     stopLiveCapture();
