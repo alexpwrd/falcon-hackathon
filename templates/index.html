@@ -63,7 +63,13 @@
             margin: 0 auto;
             padding: 10px 20px;
         }
-        .header h1 { font-size: 24px; margin: 0; }
+        .header h1 { 
+            font-size: 24px; 
+            margin: 0; 
+            font-weight: bold;
+            text-align: center;
+            flex-grow: 1;
+        }
         .dropdown-menu { font-size: 10px; }
         .footer {
             background-color: #f8f9fa;
@@ -86,6 +92,7 @@
 <body>
     <div class="header">
         <div class="header-content">
+            <img width="24" height="24" src="https://img.icons8.com/external-others-inmotus-design/67/1A1A1A/external-Eagle-eagle-others-inmotus-design-3.png" alt="external-Eagle-eagle-others-inmotus-design-3"/>
             <h1>Falcon Vision Aid</h1>
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="modeDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -139,10 +146,21 @@
 
     <footer class="footer">
         <div class="footer-content">
-            <span>Debug Mode</span>
-            <div class="custom-control custom-switch">
-                <input type="checkbox" class="custom-control-input" id="debugSwitch">
-                <label class="custom-control-label" for="debugSwitch"></label>
+            <a href="https://github.com/alexpwrd/falcon-hackathon" target="_blank">
+                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="32" height="32">
+            </a>
+            <div class="dropup">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="settingsDropup" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="bi bi-gear"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="settingsDropup">
+                    <div class="dropdown-item">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="debugSwitch">
+                            <label class="custom-control-label" for="debugSwitch">Debug Mode</label>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
