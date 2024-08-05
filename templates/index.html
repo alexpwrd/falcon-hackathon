@@ -6,39 +6,11 @@
     <title>Falcon Vision Aid</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        #resizedImage {
-            max-width: 100%;
-            height: auto;
-            margin-top: 20px;
-        }
-        .btn-custom {
-            font-size: 18px;
-            padding: 10px 20px;
-            margin: 5px 0;
-            width: 100%;
-        }
-        #loading {
-            display: none;
-            margin-top: 20px;
-        }
-        .spoken-status {
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        .spoken-success {
-            color: green;
-        }
-        .spoken-failure {
-            color: red;
-        }
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        #resizedImage { max-width: 100%; height: auto; margin-top: 20px; }
+        .btn-custom { font-size: 18px; padding: 10px 20px; margin: 5px 0; width: 100%; }
+        #loading { display: none; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -47,59 +19,19 @@
     <button id="continuousButton" class="btn btn-secondary btn-custom">Start Live Capture</button>
     <div id="loading">Processing image... Please wait.</div>
     <div id="result"></div>
-    <div id="spokenStatus" class="spoken-status"></div>
     <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
 
     <script>
-        const socket = io('http://127.0.0.1:5001', {
-            transports: ['websocket']
-        });
-
-        socket.on('connect', function() {
-            console.log('Connected to server');
-        });
-
-        socket.on('connect_error', (error) => {
-            console.error('Connection Error:', error);
-            $('#result').html('<p>Error connecting to server. Please check your connection and try again.</p>');
-        });
-
-        socket.on('error', (error) => {
-            console.error('Socket Error:', error);
-        });
-
         let continuousProcessRunning = false;
 
         function processImage() {
             $('#result').empty();
-            $('#spokenStatus').empty();
             $('#resizedImage').hide();
             $('#loading').show();
             $('#captureButton').prop('disabled', true);
             $('#continuousButton').prop('disabled', true);
 
-            socket.emit('request_image');
-        }
-
-        $(document).ready(function() {
-            $('#captureButton').click(function() {
-                processImage();
-            });
-
-            $('#continuousButton').click(function() {
-                if (continuousProcessRunning) {
-                    continuousProcessRunning = false;
-                    $.post('/stop_continuous_process');
-                    $('#continuousButton').text('Start Live Capture').removeClass('btn-danger').addClass('btn-secondary');
-                } else {
-                    continuousProcessRunning = true;
-                    $.post('/continuous_process');
-                    $('#continuousButton').text('Stop Live Capture').removeClass('btn-secondary').addClass('btn-danger');
-                    socket.emit('request_image');
-                }
-            });
-
-            socket.on('continuous_result', function(response) {
+            $.post('/process_image', function(response) {
                 $('#loading').hide();
                 $('#captureButton').prop('disabled', false);
                 $('#continuousButton').prop('disabled', false);
@@ -108,18 +40,24 @@
                 } else {
                     $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
                     $('#resizedImage').attr('src', response.resized_image_url).show();
-
-                    if (response.instructions_spoken) {
-                        $('#spokenStatus').html('Instructions were spoken successfully').addClass('spoken-success').removeClass('spoken-failure');
-                    } else {
-                        $('#spokenStatus').html('Failed to speak instructions').addClass('spoken-failure').removeClass('spoken-success');
-                    }
                 }
 
                 if (continuousProcessRunning) {
-                    setTimeout(function() {
-                        socket.emit('request_image');
-                    }, 100);
+                    setTimeout(processImage, 100);
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            $('#captureButton').click(processImage);
+
+            $('#continuousButton').click(function() {
+                continuousProcessRunning = !continuousProcessRunning;
+                if (continuousProcessRunning) {
+                    $(this).text('Stop Live Capture').removeClass('btn-secondary').addClass('btn-danger');
+                    processImage();
+                } else {
+                    $(this).text('Start Live Capture').removeClass('btn-danger').addClass('btn-secondary');
                 }
             });
         });
