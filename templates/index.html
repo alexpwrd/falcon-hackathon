@@ -149,19 +149,19 @@
         
         <div id="output-container">
             <div class="card">
-                <div class="card-header">System Message</div>
-                <div class="card-body" style="display: block;">
-                    <div id="systemMessage" class="code-block">waiting ...</div>
-                </div>
-            </div>
-
-            <div class="card">
                 <div class="card-header">Image</div>
                 <div class="card-body" style="display: block;">
                     <div id="imageContainer">
                         <div id="noImage" class="code-block">...</div>
                         <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
                     </div>
+                </div>
+            </div>
+
+            <div class="card debug-card" style="display: none;">
+                <div class="card-header">System Message</div>
+                <div class="card-body" style="display: block;">
+                    <div id="systemMessage" class="code-block">waiting ...</div>
                 </div>
             </div>
 
@@ -329,6 +329,9 @@
             $('#debugSwitch').change(function() {
                 $('.debug-card').toggle(this.checked);
             });
+
+            // Initially hide debug cards
+            $('.debug-card').hide();
         });
     </script>
 </body>
