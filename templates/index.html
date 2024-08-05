@@ -184,7 +184,7 @@
     <footer class="footer">
         <div class="footer-content">
             <a href="https://github.com/alexpwrd/falcon-hackathon" target="_blank">
-                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="32" height="32">
+                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="32" height="32" style="background: transparent;">
             </a>
             <button id="settingsButton" class="btn btn-link p-0" type="button">
                 <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
@@ -277,6 +277,7 @@
                     $('#captureButton').show();
                     $('#liveCaptureButton').hide();
                     stopLiveCapture();
+                    $('#systemMessage').text('Waiting for image capture...');
                 } else {
                     $('#captureButton').hide();
                     $('#liveCaptureButton').show();
@@ -292,7 +293,6 @@
                 continuousProcessRunning = false;
                 $('#liveCaptureButton').text('Start Live Capture').removeClass('btn-danger').addClass('btn-success');
                 clearInterval(countdownInterval);
-                $('#systemMessage').text('Live capture stopped');
             }
 
             $('#liveCaptureButton').click(function() {
