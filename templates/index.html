@@ -317,28 +317,11 @@
                 }
             });
 
-            $('.dropdown-toggle').click(function() {
-                $(this).closest('.card').find('.card-body').slideToggle();
-            });
-
-            $('#settingsButton').click(function(e) {
-                e.stopPropagation();
-                $('#settingsDropdown').toggle();
-            });
-
-            $(document).click(function() {
-                $('#settingsDropdown').hide();
-            });
-
-            $('#settingsDropdown').click(function(e) {
-                e.stopPropagation();
-            });
-
             $('#debugSwitch').change(function() {
                 $('.debug-card').toggleClass('active', this.checked);
                 if (this.checked) {
-                    $('.debug-card .card-body').show();
-                    $('.debug-card .card-header.dropdown-toggle + .card-body').hide();
+                    $('.debug-card .card-body').hide();
+                    $('.debug-card:not(.dropdown-toggle) .card-body').show();
                 }
             });
 
@@ -351,6 +334,13 @@
 
             // Ensure the image card is always visible
             $('.card:not(.debug-card)').show().find('.card-body').show();
+
+            // Ensure system message card body is always visible when debug mode is on
+            $('#debugSwitch').change(function() {
+                if (this.checked) {
+                    $('.debug-card.active:not(.dropdown-toggle) .card-body').show();
+                }
+            });
         });
     </script>
 </body>
