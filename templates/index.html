@@ -335,8 +335,9 @@
                 $(this).next('.card-body').slideToggle();
             });
 
-            // Initially hide debug cards
+            // Initially hide debug cards and their bodies
             $('.debug-card').hide();
+            $('.debug-card .card-body').hide();
 
             // Ensure the image card is always visible
             $('.card:not(.debug-card)').show().find('.card-body').show();
