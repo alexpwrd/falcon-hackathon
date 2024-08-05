@@ -51,6 +51,10 @@
             padding: 15px 0; 
             margin: 10px 0; 
         }
+        .btn-group .btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -84,10 +88,10 @@
             if (!isContinuous) {
                 $('#result').empty();
                 $('#resizedImage').hide();
+                $('#mainButton').prop('disabled', true);
             }
             $('#loading').show();
             $('#countdown').hide();
-            $('.btn-group').prop('disabled', true);
 
             $.ajax({
                 url: '/process_image',
@@ -95,7 +99,9 @@
                 timeout: 60000, // 60 seconds timeout
                 success: function(response) {
                     $('#loading').hide();
-                    $('.btn-group').prop('disabled', false);
+                    if (!isContinuous) {
+                        $('#mainButton').prop('disabled', false);
+                    }
                     if (response.error) {
                         $('#result').html('<p>Error: ' + response.error + '</p>');
                     } else {
@@ -116,7 +122,9 @@
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     $('#loading').hide();
-                    $('.btn-group').prop('disabled', false);
+                    if (!isContinuous) {
+                        $('#mainButton').prop('disabled', false);
+                    }
                     $('#result').html('<p>Error: Failed to process image. Please try again.</p>');
                     console.error('Error:', textStatus, errorThrown);
                 },
