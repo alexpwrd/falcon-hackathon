@@ -8,14 +8,11 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        #resizedImage { max-width: 100%; height: auto; margin-top: 20px; }
+        #resizedImage { max-width: 100%; height: auto; }
         .btn-custom { font-size: 18px; padding: 10px 20px; margin: 5px 0; width: 100%; }
-        #loading { display: none; margin-top: 20px; }
-        #countdown { display: none; margin-top: 10px; font-weight: bold; }
         h1 { font-size: 24px; }
-        h2 { font-size: 18px; margin-top: 15px; }
-        .dropdown-toggle { cursor: pointer; }
-        .dropdown-content { display: none; background-color: #f9f9f9; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .card { margin-bottom: 20px; }
+        .card-header { cursor: pointer; }
         .code-block { background-color: #f4f4f4; border: 1px solid #ddd; border-radius: 4px; padding: 10px; font-family: monospace; white-space: pre-wrap; }
         #output-container { min-height: calc(100vh - 200px); display: flex; flex-direction: column; }
     </style>
@@ -24,26 +21,52 @@
     <h1>Falcon Vision Aid</h1>
     <button id="captureButton" class="btn btn-primary btn-custom">Capture New Image</button>
     <button id="continuousButton" class="btn btn-secondary btn-custom">Start Live Capture</button>
-    <div id="loading" class="code-block">Processing image... Please wait.</div>
-    <div id="countdown"></div>
+    
+    <div class="card mt-3">
+        <div class="card-header">Message</div>
+        <div class="card-body">
+            <div id="systemMessage" class="code-block">waiting ...</div>
+        </div>
+    </div>
+
     <div id="output-container">
-        <div id="result"></div>
-        <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
+        <div class="card">
+            <div class="card-header dropdown-toggle">Image Description</div>
+            <div class="card-body">
+                <div id="imageDescription" class="code-block">...</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header dropdown-toggle">Instructions</div>
+            <div class="card-body">
+                <div id="instructions" class="code-block">...</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Image</div>
+            <div class="card-body">
+                <div id="imageContainer">
+                    <div id="noImage" class="code-block">...</div>
+                    <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         let continuousProcessRunning = false;
         let countdownInterval;
-        let lastOutput = '';
 
         function updateCountdown(seconds) {
-            $('#countdown').text(`Next capture in ${seconds} seconds`).show();
+            $('#systemMessage').text(`Next capture in ${seconds} seconds`);
         }
 
         function processImage(isContinuous = false) {
             $('#resizedImage').hide();
-            $('#loading').show();
-            $('#countdown').hide();
+            $('#noImage').show();
+            $('#systemMessage').text('Processing image... Please wait.');
             $('#captureButton').prop('disabled', true);
             $('#continuousButton').prop('disabled', true);
 
@@ -52,28 +75,24 @@
                 method: 'POST',
                 timeout: 60000, // 60 seconds timeout
                 success: function(response) {
-                    $('#loading').hide();
                     $('#captureButton').prop('disabled', false);
                     $('#continuousButton').prop('disabled', false);
                     if (response.error) {
-                        lastOutput = '<div class="code-block">Error: ' + response.error + '</div>';
+                        $('#systemMessage').text('Error: ' + response.error);
                     } else {
-                        lastOutput = '<h2 class="dropdown-toggle">Image Description</h2>' +
-                            '<div class="dropdown-content"><div class="code-block">' + response.description + '</div></div>' +
-                            '<h2 class="dropdown-toggle">Instructions</h2>' +
-                            '<div class="dropdown-content"><div class="code-block">' + response.instructions + '</div></div>';
+                        $('#systemMessage').text('Success');
+                        $('#imageDescription').text(response.description);
+                        $('#instructions').text(response.instructions);
                         if (response.resized_image_url) {
                             $('#resizedImage').attr('src', response.resized_image_url).show();
+                            $('#noImage').hide();
                         }
                     }
-                    $('#result').html(lastOutput);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    $('#loading').hide();
                     $('#captureButton').prop('disabled', false);
                     $('#continuousButton').prop('disabled', false);
-                    lastOutput = '<div class="code-block">Error: Failed to process image. Please try again.</div>';
-                    $('#result').html(lastOutput);
+                    $('#systemMessage').text('Error: Failed to process image. Please try again.');
                     console.error('Error:', textStatus, errorThrown);
                 },
                 complete: function() {
@@ -105,12 +124,12 @@
                 } else {
                     $(this).text('Start Live Capture').removeClass('btn-danger').addClass('btn-secondary');
                     clearInterval(countdownInterval);
-                    $('#countdown').hide();
+                    $('#systemMessage').text('waiting ...');
                 }
             });
 
-            $(document).on('click', '.dropdown-toggle', function() {
-                $(this).next('.dropdown-content').slideToggle();
+            $('.dropdown-toggle').click(function() {
+                $(this).closest('.card').find('.card-body').slideToggle();
             });
         });
     </script>
