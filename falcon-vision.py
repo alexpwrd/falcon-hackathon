@@ -8,8 +8,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import imghdr
 from flask import Flask, render_template, jsonify, request, send_from_directory
-import threading # pip install
-from flask_socketio import SocketIO
+import threading
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -41,7 +40,8 @@ FALCON_HEADERS = {
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
-socketio = SocketIO(app)
+
+continuous_process_running = False
 
 def take_photo(camera_id=0, filename='visionAId.jpg', filepath='~/storage/dcim/', resolution='800x600'):
     _path = os.path.join(filepath, filename)
@@ -241,5 +241,6 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == "__main__":
-    # app.run(host='0.0.0.0', port=5001, debug=True)
+    from flask_socketio import SocketIO
+    socketio = SocketIO(app)
     socketio.run(app, host='0.0.0.0', port=5001, debug=True)
