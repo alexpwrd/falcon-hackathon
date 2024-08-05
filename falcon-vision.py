@@ -8,6 +8,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 import imghdr
 from flask import Flask, render_template, jsonify, request, send_from_directory
+import threading
+from flask_socketio import SocketIO # pip install flask-socketio
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -214,15 +216,37 @@ def process_image_route():
     result = process_image()
     return jsonify(result)
 
+# @app.route('/continuous_process', methods=['POST'])
+# def continuous_process():
+#     global continuous_process_running
+#     continuous_process_running = True
+#     while continuous_process_running:
+#         result = process_image()
+#         if result.get("error"):
+#             return jsonify(result)
+#         return jsonify(result)
+
 @app.route('/continuous_process', methods=['POST'])
 def continuous_process():
     global continuous_process_running
     continuous_process_running = True
-    while continuous_process_running:
-        result = process_image()
-        if result.get("error"):
-            return jsonify(result)
-        return jsonify(result)
+
+    def run_continuous_process():
+        while continuous_process_running:
+            result = process_image()
+            if result.get("error"):
+                return jsonify(result)
+            # Send the result back to the client
+            socketio.emit('continuous_result', result)
+
+    threading.Thread(target=run_continuous_process).start()
+    return jsonify({"status": "Continuous process started"})
+
+@app.route('/stop_continuous_process', methods=['POST'])
+def stop_continuous_process():
+    global continuous_process_running
+    continuous_process_running = False
+    return jsonify({"status": "Continuous process stopped"})
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
