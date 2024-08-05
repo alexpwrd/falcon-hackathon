@@ -218,10 +218,13 @@ async def process_image_async():
         return {"error": "Failed to take photo or photo file not found"}
 
 @socketio.on('request_image')
-async def handle_request_image():
+def handle_request_image():
     if continuous_process_running:
-        result = await process_image_async()
-        socketio.emit('continuous_result', result)
+        socketio.start_background_task(process_and_emit_result)
+
+def process_and_emit_result():
+    result = asyncio.run(process_image_async())
+    socketio.emit('continuous_result', result)
 
 @app.route('/')
 def index():
@@ -237,13 +240,13 @@ def continuous_process():
     global continuous_process_running
     continuous_process_running = True
 
-    async def run_continuous_process():
+    def run_continuous_process():
         while continuous_process_running:
-            result = await process_image_async()
+            result = asyncio.run(process_image_async())
             socketio.emit('continuous_result', result)
             if result.get("error"):
                 break
-            await asyncio.sleep(0.1)  # Small delay to prevent overwhelming the system
+            time.sleep(0.1)  # Small delay to prevent overwhelming the system
 
     socketio.start_background_task(run_continuous_process)
     return jsonify({"status": "Continuous process started"})
@@ -259,4 +262,4 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == "__main__":
-    socketio.run(app, host='127.0.0.1', port=5001, debug=True, async_mode='asyncio')
+    socketio.run(app, host='127.0.0.1', port=5001, debug=True, allow_unsafe_werkzeug=True)
