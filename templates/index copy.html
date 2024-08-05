@@ -9,15 +9,10 @@
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
         #resizedImage { max-width: 100%; height: auto; margin-top: 20px; }
-        .btn-custom { font-size: 24px; padding: 15px 30px; margin: 10px 0; width: 100%; }
+        .btn-custom { font-size: 18px; padding: 10px 20px; margin: 5px 0; width: 100%; }
         #loading { display: none; margin-top: 20px; }
         #countdown { display: none; margin-top: 10px; font-weight: bold; }
-        .collapse-header { cursor: pointer; margin-top: 20px; }
-        .collapse-header:after { content: ' ▼'; font-size: 0.8em; }
-        .collapse-header.active:after { content: ' ▲'; }
-        .collapse-content { display: none; margin-top: 10px; }
     </style>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
     <h1>Falcon Vision Aid</h1>
@@ -55,19 +50,10 @@
                     if (response.error) {
                         $('#result').html('<p>Error: ' + response.error + '</p>');
                     } else {
-                        $('#result').html(
-                            '<h3 class="collapse-header" data-target="#description">Image Description</h2>' +
-                            '<div id="description" class="collapse-content"><p>' + response.description + '</p></div>' +
-                            '<h3 class="collapse-header" data-target="#instructions">Instructions</h2>' +
-                            '<div id="instructions" class="collapse-content"><p>' + response.instructions + '</p></div>'
-                        );
+                        $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
                         if (response.resized_image_url) {
                             $('#resizedImage').attr('src', response.resized_image_url).show();
                         }
-                        $('.collapse-header').click(function() {
-                            $(this).toggleClass('active');
-                            $($(this).data('target')).slideToggle();
-                        });
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
