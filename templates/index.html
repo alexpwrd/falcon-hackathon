@@ -9,20 +9,25 @@
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
         #resizedImage { max-width: 100%; height: auto; margin-top: 20px; }
-        .btn-custom { font-size: 24px; padding: 15px 30px; margin: 10px 0; width: 100%; }
+        .btn-custom { font-size: 28px; padding: 20px 40px; margin: 15px 0; width: 100%; }
         #loading { display: none; margin-top: 20px; }
         #countdown { display: none; margin-top: 10px; font-weight: bold; }
-        .collapse-header { cursor: pointer; margin-top: 20px; }
+        .collapse-header { cursor: pointer; margin-top: 20px; font-size: 1.2em; }
         .collapse-header:after { content: ' ▼'; font-size: 0.8em; }
         .collapse-header.active:after { content: ' ▲'; }
-        .collapse-content { display: none; margin-top: 10px; }
+        .collapse-content { display: none; margin-top: 10px; background-color: #f6f8fa; border-radius: 3px; padding: 10px; font-family: monospace; white-space: pre-wrap; }
+        #modeSelect { font-size: 20px; margin: 15px 0; width: 100%; }
     </style>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
     <h1>Falcon Vision Aid</h1>
-    <button id="captureButton" class="btn btn-primary btn-custom">Capture New Image</button>
-    <button id="continuousButton" class="btn btn-secondary btn-custom">Start Continuous Capture</button>
+    <select id="modeSelect" class="form-control">
+        <option value="live">Live Capture</option>
+        <option value="single">Single Capture</option>
+    </select>
+    <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">Capture New Image</button>
+    <button id="continuousButton" class="btn btn-secondary btn-custom">Start Live Capture</button>
     <div id="loading">Processing image... Please wait.</div>
     <div id="countdown"></div>
     <div id="result"></div>
@@ -56,10 +61,10 @@
                         $('#result').html('<p>Error: ' + response.error + '</p>');
                     } else {
                         $('#result').html(
-                            '<h3 class="collapse-header" data-target="#description">Image Description</h2>' +
-                            '<div id="description" class="collapse-content"><p>' + response.description + '</p></div>' +
-                            '<h3 class="collapse-header" data-target="#instructions">Instructions</h2>' +
-                            '<div id="instructions" class="collapse-content"><p>' + response.instructions + '</p></div>'
+                            '<h4 class="collapse-header" data-target="#description">Image Description</h4>' +
+                            '<div id="description" class="collapse-content">' + response.description + '</div>' +
+                            '<h4 class="collapse-header" data-target="#instructions">Instructions</h4>' +
+                            '<div id="instructions" class="collapse-content">' + response.instructions + '</div>'
                         );
                         if (response.resized_image_url) {
                             $('#resizedImage').attr('src', response.resized_image_url).show();
@@ -101,14 +106,27 @@
             $('#continuousButton').click(function() {
                 continuousProcessRunning = !continuousProcessRunning;
                 if (continuousProcessRunning) {
-                    $(this).text('Stop Continuous Capture').removeClass('btn-secondary').addClass('btn-danger');
+                    $(this).text('Stop Live Capture').removeClass('btn-secondary').addClass('btn-danger');
                     processImage(true);
                 } else {
-                    $(this).text('Start Continuous Capture').removeClass('btn-danger').addClass('btn-secondary');
+                    $(this).text('Start Live Capture').removeClass('btn-danger').addClass('btn-secondary');
                     clearInterval(countdownInterval);
                     $('#countdown').hide();
                 }
             });
+
+            $('#modeSelect').change(function() {
+                if ($(this).val() === 'single') {
+                    $('#captureButton').show();
+                    $('#continuousButton').hide();
+                } else {
+                    $('#captureButton').hide();
+                    $('#continuousButton').show();
+                }
+            });
+
+            // Set initial button visibility
+            $('#modeSelect').trigger('change');
         });
     </script>
 </body>
