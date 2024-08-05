@@ -18,17 +18,19 @@
         .collapse-header { cursor: pointer; margin-top: 10px; font-size: 1em; }
         .collapse-header:after { content: ' ▼'; font-size: 0.8em; }
         .collapse-header.active:after { content: ' ▲'; }
-        .collapse-content { display: none; margin-top: 5px; background-color: #f6f8fa; border-radius: 3px; padding: 10px; font-family: monospace; white-space: pre-wrap;}
+        .collapse-content { display: none; margin-top: 5px; background-color: #f6f8fa; border-radius: 3px; padding: 10px; font-family: monospace; white-space: pre-wrap; }
         #modeSelect { font-size: 20px; margin: 15px 0; width: 100%; }
         .btn-group { width: 100%; }
         .dropdown-toggle { width: 100%; text-align: left; }
         .dropdown-toggle::after { float: right; margin-top: 10px; }
+        .btn-success { background-color: #28a745; border-color: #28a745; }
+        .btn-success:hover { background-color: #218838; border-color: #1e7e34; }
     </style>
 </head>
 <body>
     <h1>Falcon Vision Aid</h1>
     <div class="btn-group">
-        <button type="button" class="btn btn-primary dropdown-toggle btn-custom" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button type="button" class="btn btn-success dropdown-toggle btn-custom" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span id="selectedMode">Live Capture</span>
         </button>
         <div class="dropdown-menu w-100">
@@ -37,7 +39,7 @@
         </div>
     </div>
     <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">Capture New Image</button>
-    <div id="loading">Processing image... Please wait.</div>
+    <div id="loading" style="display: none;">Processing image... Please wait.</div>
     <div id="countdown"></div>
     <div id="result"></div>
     <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
@@ -51,8 +53,10 @@
         }
 
         function processImage(isContinuous = false) {
-            $('#result').empty();
-            $('#resizedImage').hide();
+            if (!isContinuous) {
+                $('#result').empty();
+                $('#resizedImage').hide();
+            }
             $('#loading').show();
             $('#countdown').hide();
             $('.btn-group').prop('disabled', true);
@@ -115,9 +119,9 @@
                     continuousProcessRunning = false;
                     clearInterval(countdownInterval);
                     $('#countdown').hide();
-                    $('.btn-group .btn').text('Capture New Image').removeClass('btn-secondary btn-danger').addClass('btn-primary');
+                    $('.btn-group .btn').text('Capture New Image').removeClass('btn-success btn-danger').addClass('btn-primary');
                 } else {
-                    $('.btn-group .btn').text('Start Live Capture').removeClass('btn-primary btn-danger').addClass('btn-secondary');
+                    $('.btn-group .btn').text('Start Live Capture').removeClass('btn-primary btn-danger').addClass('btn-success');
                 }
             });
 
@@ -128,10 +132,10 @@
                 } else {
                     continuousProcessRunning = !continuousProcessRunning;
                     if (continuousProcessRunning) {
-                        $(this).text('Stop Live Capture').removeClass('btn-secondary').addClass('btn-danger');
+                        $(this).text('Stop Live Capture').removeClass('btn-success').addClass('btn-danger');
                         processImage(true);
                     } else {
-                        $(this).text('Start Live Capture').removeClass('btn-danger').addClass('btn-secondary');
+                        $(this).text('Start Live Capture').removeClass('btn-danger').addClass('btn-success');
                         clearInterval(countdownInterval);
                         $('#countdown').hide();
                     }
