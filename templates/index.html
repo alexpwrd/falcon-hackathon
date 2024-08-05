@@ -181,14 +181,14 @@
             <a href="https://github.com/alexpwrd/falcon-hackathon" target="_blank">
                 <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="32" height="32">
             </a>
+            <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="debugSwitch">
+                <label class="custom-control-label" for="debugSwitch">Debug Mode</label>
+            </div>
             <button id="settingsButton" class="btn btn-link p-0" type="button">
                 <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
             </button>
             <div id="settingsDropdown" class="settings-dropdown">
-                <div class="custom-control custom-switch">
-                    <input type="checkbox" class="custom-control-input" id="debugSwitch">
-                    <label class="custom-control-label" for="debugSwitch">Debug Mode</label>
-                </div>
                 <!-- Add more toggles here as needed -->
             </div>
         </div>
@@ -287,15 +287,9 @@
             });
 
             // Handle debug switch toggle
-            $('#debugSwitch').on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                var isChecked = $(this).prop('checked');
-                $(this).prop('checked', !isChecked);
-                $('.debug-card').toggle(!isChecked);
+            $('#debugSwitch').on('change', function() {
+                $('.debug-card').toggle(this.checked);
             });
-
-            // ... (rest of the code remains the same) ...
         });
     </script>
 </body>
