@@ -170,16 +170,24 @@
             </div>
 
             <div class="card debug-card">
-                <div class="card-header dropdown-toggle">Image Description</div>
-                <div class="card-body">
-                    <div id="imageDescription" class="code-block">No description available</div>
+                <div class="card-header dropdown-toggle" data-toggle="collapse" data-target="#imageDescriptionBody">
+                    Image Description
+                </div>
+                <div id="imageDescriptionBody" class="collapse">
+                    <div class="card-body">
+                        <div id="imageDescription" class="code-block">No description available</div>
+                    </div>
                 </div>
             </div>
 
             <div class="card debug-card">
-                <div class="card-header dropdown-toggle">Instructions</div>
-                <div class="card-body">
-                    <div id="instructions" class="code-block">No instructions available</div>
+                <div class="card-header dropdown-toggle" data-toggle="collapse" data-target="#instructionsBody">
+                    Instructions
+                </div>
+                <div id="instructionsBody" class="collapse">
+                    <div class="card-body">
+                        <div id="instructions" class="code-block">No instructions available</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -321,23 +329,19 @@
                 if (this.checked) {
                     // Show all debug cards
                     $('.debug-card').show();
-                    // Show only the system message card body
-                    $('.debug-card:not(.dropdown-toggle) .card-body').show();
                     // Ensure image description and instructions cards are collapsed
-                    $('.debug-card.dropdown-toggle .card-body').hide();
+                    $('#imageDescriptionBody, #instructionsBody').collapse('hide');
                 } else {
                     // Hide all debug cards when debug mode is off
                     $('.debug-card').hide();
                 }
             });
 
-            $('.debug-card .card-header.dropdown-toggle').click(function() {
-                $(this).next('.card-body').slideToggle();
-            });
+            // Remove the click handler for dropdown-toggle, as Bootstrap will handle it
+            $('.debug-card .card-header.dropdown-toggle').off('click');
 
-            // Initially hide debug cards and their bodies
+            // Initially hide debug cards
             $('.debug-card').hide();
-            $('.debug-card .card-body').hide();
 
             // Ensure the image card is always visible
             $('.card:not(.debug-card)').show().find('.card-body').show();
