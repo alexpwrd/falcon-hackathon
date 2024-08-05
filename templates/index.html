@@ -12,9 +12,27 @@
         .btn-custom { font-size: 18px; padding: 10px 20px; margin: 5px 0; width: 100%; }
         h1 { font-size: 24px; }
         .card { margin-bottom: 20px; }
-        .card-header { cursor: pointer; }
-        .code-block { background-color: #f4f4f4; border: 1px solid #ddd; border-radius: 4px; padding: 10px; font-family: monospace; white-space: pre-wrap; }
-        #output-container { min-height: calc(100vh - 200px); display: flex; flex-direction: column; }
+        .card-header { 
+            cursor: pointer; 
+            font-size: 14px; 
+            padding: 0.5rem 1rem;
+        }
+        .code-block { 
+            background-color: #f4f4f4; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            padding: 10px; 
+            font-family: monospace; 
+            white-space: pre-wrap; 
+            font-size: 12px;
+        }
+        #output-container { 
+            min-height: calc(100vh - 200px); 
+            display: flex; 
+            flex-direction: column; 
+            overflow-y: auto;
+        }
+        .card-body { display: none; }
     </style>
 </head>
 <body>
@@ -24,7 +42,7 @@
     
     <div class="card mt-3">
         <div class="card-header">Message</div>
-        <div class="card-body">
+        <div class="card-body" style="display: block;">
             <div id="systemMessage" class="code-block">waiting ...</div>
         </div>
     </div>
@@ -46,7 +64,7 @@
 
         <div class="card">
             <div class="card-header">Image</div>
-            <div class="card-body">
+            <div class="card-body" style="display: block;">
                 <div id="imageContainer">
                     <div id="noImage" class="code-block">...</div>
                     <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
@@ -82,7 +100,7 @@
                     } else {
                         $('#systemMessage').text('Success');
                         $('#imageDescription').text(response.description);
-                        $('#instructions').text(response.instructions);
+                        $('#instructions').text(response.instructions.trim());
                         if (response.resized_image_url) {
                             $('#resizedImage').attr('src', response.resized_image_url).show();
                             $('#noImage').hide();
