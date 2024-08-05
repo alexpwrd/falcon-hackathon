@@ -12,27 +12,35 @@
         .btn-custom { font-size: 18px; padding: 10px 20px; margin: 5px 0; width: 100%; }
         #loading { display: none; margin-top: 20px; }
         #countdown { display: none; margin-top: 10px; font-weight: bold; }
+        h1 { font-size: 24px; }
+        h2 { font-size: 18px; margin-top: 15px; }
+        .dropdown-toggle { cursor: pointer; }
+        .dropdown-content { display: none; background-color: #f9f9f9; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .code-block { background-color: #f4f4f4; border: 1px solid #ddd; border-radius: 4px; padding: 10px; font-family: monospace; white-space: pre-wrap; }
+        #output-container { min-height: calc(100vh - 200px); display: flex; flex-direction: column; }
     </style>
 </head>
 <body>
     <h1>Falcon Vision Aid</h1>
     <button id="captureButton" class="btn btn-primary btn-custom">Capture New Image</button>
-    <button id="continuousButton" class="btn btn-secondary btn-custom">Start Continuous Capture</button>
-    <div id="loading">Processing image... Please wait.</div>
+    <button id="continuousButton" class="btn btn-secondary btn-custom">Start Live Capture</button>
+    <div id="loading" class="code-block">Processing image... Please wait.</div>
     <div id="countdown"></div>
-    <div id="result"></div>
-    <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
+    <div id="output-container">
+        <div id="result"></div>
+        <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
+    </div>
 
     <script>
         let continuousProcessRunning = false;
         let countdownInterval;
+        let lastOutput = '';
 
         function updateCountdown(seconds) {
             $('#countdown').text(`Next capture in ${seconds} seconds`).show();
         }
 
         function processImage(isContinuous = false) {
-            $('#result').empty();
             $('#resizedImage').hide();
             $('#loading').show();
             $('#countdown').hide();
@@ -48,24 +56,29 @@
                     $('#captureButton').prop('disabled', false);
                     $('#continuousButton').prop('disabled', false);
                     if (response.error) {
-                        $('#result').html('<p>Error: ' + response.error + '</p>');
+                        lastOutput = '<div class="code-block">Error: ' + response.error + '</div>';
                     } else {
-                        $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
+                        lastOutput = '<h2 class="dropdown-toggle">Image Description</h2>' +
+                            '<div class="dropdown-content"><div class="code-block">' + response.description + '</div></div>' +
+                            '<h2 class="dropdown-toggle">Instructions</h2>' +
+                            '<div class="dropdown-content"><div class="code-block">' + response.instructions + '</div></div>';
                         if (response.resized_image_url) {
                             $('#resizedImage').attr('src', response.resized_image_url).show();
                         }
                     }
+                    $('#result').html(lastOutput);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     $('#loading').hide();
                     $('#captureButton').prop('disabled', false);
                     $('#continuousButton').prop('disabled', false);
-                    $('#result').html('<p>Error: Failed to process image. Please try again.</p>');
+                    lastOutput = '<div class="code-block">Error: Failed to process image. Please try again.</div>';
+                    $('#result').html(lastOutput);
                     console.error('Error:', textStatus, errorThrown);
                 },
                 complete: function() {
                     if (isContinuous && continuousProcessRunning) {
-                        let countdown = 3; // Changed from 5 to 3
+                        let countdown = 3;
                         updateCountdown(countdown);
                         countdownInterval = setInterval(() => {
                             countdown--;
@@ -87,13 +100,17 @@
             $('#continuousButton').click(function() {
                 continuousProcessRunning = !continuousProcessRunning;
                 if (continuousProcessRunning) {
-                    $(this).text('Stop Continuous Capture').removeClass('btn-secondary').addClass('btn-danger');
+                    $(this).text('Stop Live Capture').removeClass('btn-secondary').addClass('btn-danger');
                     processImage(true);
                 } else {
-                    $(this).text('Start Continuous Capture').removeClass('btn-danger').addClass('btn-secondary');
+                    $(this).text('Start Live Capture').removeClass('btn-danger').addClass('btn-secondary');
                     clearInterval(countdownInterval);
                     $('#countdown').hide();
                 }
+            });
+
+            $(document).on('click', '.dropdown-toggle', function() {
+                $(this).next('.dropdown-content').slideToggle();
             });
         });
     </script>
