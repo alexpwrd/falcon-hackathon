@@ -65,7 +65,7 @@
                 },
                 complete: function() {
                     if (isContinuous && continuousProcessRunning) {
-                        let countdown = 5;
+                        let countdown = 3; // Changed from 5 to 3
                         updateCountdown(countdown);
                         countdownInterval = setInterval(() => {
                             countdown--;
