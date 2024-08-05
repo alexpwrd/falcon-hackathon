@@ -136,7 +136,11 @@ def generate_image_description(image_path):
                 "content": [
                     {
                         "type": "text",
-                        "text": "Describe this image concisely for a blind person. Focus on the main elements and their layout. A special attention on obstacles, people, and other dangers. Try to give a sense of distance for the objects",
+                        "text": '''
+                        Describe this image concisely for a blind person.
+                        Focus on the main elements and their layout.
+                        A special attention on obstacles, people, and other dangers.
+                        Try to give a sense of distance for the objects (use metric system)''',
                     },
                     {
                         "type": "image_url",
@@ -185,6 +189,8 @@ def generate_instructions(image_description):
                 what should a blind person do next? Keep it brief. Image description: {image_description},
                 a special attention on avoiding obstacles, people, and other dangers.
                 do not assume where the person is going, just describe what to avoid, how to move and approx distance.
+                use metric system for distances.
+                Do not say move forward, move left, move right, etc. just state the surrounding.
                 """,
             },
         ],
