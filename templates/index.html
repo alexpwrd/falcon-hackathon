@@ -16,7 +16,7 @@
 <body>
     <h1>Falcon Vision Aid</h1>
     <button id="captureButton" class="btn btn-primary btn-custom">Capture New Image</button>
-    <button id="continuousButton" class="btn btn-secondary btn-custom">Start Live Capture</button>
+    <button id="continuousButton" class="btn btn-secondary btn-custom">Start Continuous Capture</button>
     <div id="loading">Processing image... Please wait.</div>
     <div id="result"></div>
     <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
@@ -43,7 +43,7 @@
                 }
 
                 if (continuousProcessRunning) {
-                    setTimeout(processImage, 100);
+                    setTimeout(processImage, 5000); // Wait 5 seconds before next capture
                 }
             });
         }
@@ -54,10 +54,10 @@
             $('#continuousButton').click(function() {
                 continuousProcessRunning = !continuousProcessRunning;
                 if (continuousProcessRunning) {
-                    $(this).text('Stop Live Capture').removeClass('btn-secondary').addClass('btn-danger');
+                    $(this).text('Stop Continuous Capture').removeClass('btn-secondary').addClass('btn-danger');
                     processImage();
                 } else {
-                    $(this).text('Start Live Capture').removeClass('btn-danger').addClass('btn-secondary');
+                    $(this).text('Start Continuous Capture').removeClass('btn-danger').addClass('btn-secondary');
                 }
             });
         });
