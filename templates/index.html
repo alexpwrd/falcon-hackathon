@@ -21,24 +21,34 @@
         .collapse-content { display: none; margin-top: 5px; background-color: #f6f8fa; border-radius: 3px; padding: 10px; font-family: monospace; white-space: pre-wrap; }
         #modeSelect { font-size: 20px; margin: 15px 0; width: 100%; }
         .btn-group { width: 100%; }
-        .dropdown-toggle { width: 100%; text-align: left; }
-        .dropdown-toggle::after { float: right; margin-top: 10px; }
+        .btn-group > .btn:first-child { width: 85%; text-align: left; }
+        .btn-group > .btn:last-child { width: 15%; }
+        .btn-group .dropdown-toggle::after { margin-left: 10px; }
         .btn-success { background-color: #28a745; border-color: #28a745; }
         .btn-success:hover { background-color: #218838; border-color: #1e7e34; }
+        .btn-success:not(:disabled):not(.disabled).active,
+        .btn-success:not(:disabled):not(.disabled):active {
+            background-color: #1e7e34;
+            border-color: #1c7430;
+        }
+        .btn-outline-success { color: #28a745; border-color: #28a745; }
+        .btn-outline-success:hover { color: #fff; background-color: #28a745; border-color: #28a745; }
     </style>
 </head>
 <body>
     <h1>Falcon Vision Aid</h1>
     <div class="btn-group">
-        <button type="button" class="btn btn-success dropdown-toggle btn-custom" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button type="button" class="btn btn-success btn-custom" id="mainButton">
             <span id="selectedMode">Live Capture</span>
         </button>
-        <div class="dropdown-menu w-100">
+        <button type="button" class="btn btn-outline-success dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="sr-only">Toggle Dropdown</span>
+        </button>
+        <div class="dropdown-menu dropdown-menu-right w-100">
             <a class="dropdown-item" href="#" data-mode="live">Live Capture</a>
             <a class="dropdown-item" href="#" data-mode="single">Single Capture</a>
         </div>
     </div>
-    <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">Capture New Image</button>
     <div id="loading" style="display: none;">Processing image... Please wait.</div>
     <div id="countdown"></div>
     <div id="result"></div>
@@ -119,13 +129,13 @@
                     continuousProcessRunning = false;
                     clearInterval(countdownInterval);
                     $('#countdown').hide();
-                    $('.btn-group .btn').text('Capture New Image').removeClass('btn-success btn-danger').addClass('btn-primary');
+                    $('#mainButton').text('Capture New Image').removeClass('btn-success btn-danger').addClass('btn-primary');
                 } else {
-                    $('.btn-group .btn').text('Start Live Capture').removeClass('btn-primary btn-danger').addClass('btn-success');
+                    $('#mainButton').text('Start Live Capture').removeClass('btn-primary btn-danger').addClass('btn-success');
                 }
             });
 
-            $('.btn-group .btn').click(function() {
+            $('#mainButton').click(function() {
                 let mode = $('#selectedMode').text();
                 if (mode === 'Single Capture') {
                     processImage(false);
