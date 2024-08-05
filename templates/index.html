@@ -131,11 +131,20 @@
         <div class="header-content">
             <img width="24" height="24" src="https://img.icons8.com/external-others-inmotus-design/67/1A1A1A/external-Eagle-eagle-others-inmotus-design-3.png" alt="external-Eagle-eagle-others-inmotus-design-3"/>
             <h1>Falcon Vision Aid</h1>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="modeDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Live
+                </button>
+                <div class="dropdown-menu" aria-labelledby="modeDropdown">
+                    <a class="dropdown-item" href="#" data-mode="single">Single</a>
+                    <a class="dropdown-item" href="#" data-mode="live">Live</a>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="content-wrapper">
-        <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">Capture New Image</button>
+        <button id="captureButton" class="btn btn-primary btn-custom">Capture New Image</button>
         <button id="liveCaptureButton" class="btn btn-success btn-custom">Start Live Capture</button>
         
         <div id="output-container">
@@ -240,17 +249,37 @@
         }
 
         $(document).ready(function() {
+            // Mode selection in header
+            $('.dropdown-item').click(function(e) {
+                e.preventDefault();
+                let mode = $(this).data('mode');
+                $('#modeDropdown').text(mode.charAt(0).toUpperCase() + mode.slice(1));
+                if (mode === 'single') {
+                    $('#captureButton').show();
+                    $('#liveCaptureButton').hide();
+                    stopLiveCapture();
+                } else {
+                    $('#captureButton').hide();
+                    $('#liveCaptureButton').show();
+                }
+            });
+
             $('#captureButton').click(() => processImage(false));
 
+            function stopLiveCapture() {
+                continuousProcessRunning = false;
+                $('#liveCaptureButton').text('Start Live Capture').removeClass('btn-danger').addClass('btn-success');
+                clearInterval(countdownInterval);
+                $('#systemMessage').text('waiting ...');
+            }
+
             $('#liveCaptureButton').click(function() {
-                continuousProcessRunning = !continuousProcessRunning;
-                if (continuousProcessRunning) {
+                if (!continuousProcessRunning) {
+                    continuousProcessRunning = true;
                     $(this).text('Stop Live Capture').removeClass('btn-success').addClass('btn-danger');
                     processImage(true);
                 } else {
-                    $(this).text('Start Live Capture').removeClass('btn-danger').addClass('btn-success');
-                    clearInterval(countdownInterval);
-                    $('#systemMessage').text('waiting ...');
+                    stopLiveCapture();
                 }
             });
 
