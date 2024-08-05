@@ -10,9 +10,8 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { font-size: 24px; margin-bottom: 20px; }
         #resizedImage { max-width: 100%; height: auto; margin-top: 20px; }
-        .btn-custom { font-size: 24px; padding: 15px 30px; margin: 10px 0; width: 100%; }
+        .btn-custom { font-size: 18px; padding: 10px 20px; margin: 5px 0; width: 100%; }
         #loading { display: none; margin-top: 20px; }
         #countdown { display: none; margin-top: 10px; font-weight: bold; }
         .btn-group { width: 100%; }
@@ -71,18 +70,15 @@
                 timeout: 60000, // 60 seconds timeout
                 success: function(response) {
                     $('#loading').hide();
-                    $('#mainButton').prop('disabled', false);
+                    if (!isContinuous) {
+                        $('#mainButton').prop('disabled', false);
+                    }
                     if (response.error) {
                         $('#result').html('<p>Error: ' + response.error + '</p>');
                     } else {
                         $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
                         if (response.resized_image_url) {
                             $('#resizedImage').attr('src', response.resized_image_url).show();
-                        }
-                        // Trigger audio description
-                        if (response.instructions_spoken) {
-                            let audio = new Audio(response.instructions_spoken);
-                            audio.play();
                         }
                     }
                 },
