@@ -158,21 +158,21 @@
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card debug-card">
                 <div class="card-header">System Message</div>
-                <div class="card-body" style="display: block;">
+                <div class="card-body">
                     <div id="systemMessage" class="code-block">Waiting for image capture...</div>
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card debug-card">
                 <div class="card-header dropdown-toggle">Image Description</div>
                 <div class="card-body">
                     <div id="imageDescription" class="code-block">No description available</div>
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card debug-card">
                 <div class="card-header dropdown-toggle">Instructions</div>
                 <div class="card-body">
                     <div id="instructions" class="code-block">No instructions available</div>
@@ -236,13 +236,12 @@
                             $('#resizedImage').attr('src', response.resized_image_url).show();
                             $('#noImage').hide();
                         }
-                        // Show the card bodies
-                        $('.card-body').show();
+                        // Show only the image card body
+                        $('.card:not(.debug-card) .card-body').show();
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     $('#captureButton').prop('disabled', false);
-                    $('#liveCaptureButton').prop('disabled', false);
                     $('#systemMessage').text('Error: Failed to process image. Please try again.');
                     console.error('Error:', textStatus, errorThrown);
                 },
@@ -331,7 +330,11 @@
                 $('.debug-card').toggle(this.checked);
             });
 
+            // Initially hide debug cards
             $('.debug-card').hide();
+
+            // Ensure the image card is always visible
+            $('.card:not(.debug-card)').show();
         });
     </script>
 </body>
