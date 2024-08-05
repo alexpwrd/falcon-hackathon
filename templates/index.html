@@ -4,81 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Falcon Vision Aid</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        #resizedImage {
-            max-width: 100%;
-            height: auto;
-            margin-top: 20px;
-        }
-        #captureButton {
-            font-size: 18px;
-            padding: 10px 20px;
-        }
-        #loading {
-            display: none;
-            margin-top: 20px;
-        }
-        .spoken-status {
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        .spoken-success {
-            color: green;
-        }
-        .spoken-failure {
-            color: red;
-        }
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        #resizedImage { max-width: 100%; height: auto; margin-top: 20px; }
+        .btn-custom { font-size: 18px; padding: 10px 20px; margin: 5px 0; width: 100%; }
+        #loading { display: none; margin-top: 20px; }
+        #countdown { display: none; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
     <h1>Falcon Vision Aid</h1>
-    <button id="captureButton">Capture New Image</button>
+    <button id="captureButton" class="btn btn-primary btn-custom">Capture New Image</button>
+    <button id="continuousButton" class="btn btn-secondary btn-custom">Start Continuous Capture</button>
     <div id="loading">Processing image... Please wait.</div>
+    <div id="countdown"></div>
     <div id="result"></div>
-    <div id="spokenStatus" class="spoken-status"></div>
     <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
 
     <script>
-        $(document).ready(function() {
-            $('#captureButton').click(function() {
-                $('#result').empty();
-                $('#spokenStatus').empty();
-                $('#resizedImage').hide();
-                $('#loading').show();
-                $('#captureButton').prop('disabled', true);
+        let continuousProcessRunning = false;
+        let countdownInterval;
 
-                $.ajax({
-                    url: '/process_image',
-                    type: 'POST',
-                    success: function(response) {
-                        $('#loading').hide();
-                        $('#captureButton').prop('disabled', false);
-                        if (response.error) {
-                            $('#result').html('<p>Error: ' + response.error + '</p>');
-                        } else {
-                            $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
+        function updateCountdown(seconds) {
+            $('#countdown').text(`Next capture in ${seconds} seconds`).show();
+        }
+
+        function processImage(isContinuous = false) {
+            $('#result').empty();
+            $('#resizedImage').hide();
+            $('#loading').show();
+            $('#countdown').hide();
+            $('#captureButton').prop('disabled', true);
+            $('#continuousButton').prop('disabled', true);
+
+            $.ajax({
+                url: '/process_image',
+                method: 'POST',
+                timeout: 60000, // 60 seconds timeout
+                success: function(response) {
+                    $('#loading').hide();
+                    $('#captureButton').prop('disabled', false);
+                    $('#continuousButton').prop('disabled', false);
+                    if (response.error) {
+                        $('#result').html('<p>Error: ' + response.error + '</p>');
+                    } else {
+                        $('#result').html('<h2>Image Description:</h2><p>' + response.description + '</p><h2>Instructions:</h2><p>' + response.instructions + '</p>');
+                        if (response.resized_image_url) {
                             $('#resizedImage').attr('src', response.resized_image_url).show();
-                            
-                            if (response.instructions_spoken) {
-                                $('#spokenStatus').html('Instructions were spoken successfully').addClass('spoken-success').removeClass('spoken-failure');
-                            } else {
-                                $('#spokenStatus').html('Failed to speak instructions').addClass('spoken-failure').removeClass('spoken-success');
-                            }
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        $('#loading').hide();
-                        $('#captureButton').prop('disabled', false);
-                        $('#result').html('<p>An error occurred: ' + error + '</p>');
                     }
-                });
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $('#loading').hide();
+                    $('#captureButton').prop('disabled', false);
+                    $('#continuousButton').prop('disabled', false);
+                    $('#result').html('<p>Error: Failed to process image. Please try again.</p>');
+                    console.error('Error:', textStatus, errorThrown);
+                },
+                complete: function() {
+                    if (isContinuous && continuousProcessRunning) {
+                        let countdown = 5;
+                        updateCountdown(countdown);
+                        countdownInterval = setInterval(() => {
+                            countdown--;
+                            if (countdown > 0) {
+                                updateCountdown(countdown);
+                            } else {
+                                clearInterval(countdownInterval);
+                                processImage(true);
+                            }
+                        }, 1000);
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            $('#captureButton').click(() => processImage(false));
+
+            $('#continuousButton').click(function() {
+                continuousProcessRunning = !continuousProcessRunning;
+                if (continuousProcessRunning) {
+                    $(this).text('Stop Continuous Capture').removeClass('btn-secondary').addClass('btn-danger');
+                    processImage(true);
+                } else {
+                    $(this).text('Start Continuous Capture').removeClass('btn-danger').addClass('btn-secondary');
+                    clearInterval(countdownInterval);
+                    $('#countdown').hide();
+                }
             });
         });
     </script>
