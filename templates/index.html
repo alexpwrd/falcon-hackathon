@@ -71,7 +71,6 @@
             text-align: center;
             flex-grow: 1;
         }
-        .dropdown-menu { font-size: 14px; }
         .footer {
             background-color: #f8f9fa;
             padding: 10px 0;
@@ -88,15 +87,6 @@
             margin: 0 auto;
             padding: 0 20px;
         }
-        .dropdown-item { padding: 0.5rem 1rem; }
-        .custom-switch { padding-left: 2.25rem; }
-        .custom-control-label { padding-top: 0.2rem; }
-        .popover {
-            max-width: 300px;
-        }
-        .popover-body {
-            padding: 10px;
-        }
         .settings-dropdown {
             position: absolute;
             bottom: 100%;
@@ -109,22 +99,12 @@
             min-width: 200px;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
-        .footer-content {
-            position: relative;
-        }
         .custom-switch {
             padding-left: 2.25rem;
         }
         .custom-control-label {
             padding-top: 0.2rem;
             font-size: 14px;
-        }
-        .footer-buttons {
-            display: flex;
-            align-items: center;
-        }
-        .footer-buttons > * {
-            margin-left: 10px;
         }
     </style>
 </head>
@@ -133,15 +113,6 @@
         <div class="header-content">
             <img width="24" height="24" src="https://img.icons8.com/external-others-inmotus-design/67/1A1A1A/external-Eagle-eagle-others-inmotus-design-3.png" alt="external-Eagle-eagle-others-inmotus-design-3"/>
             <h1>Falcon Vision Aid</h1>
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="modeDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Live
-                </button>
-                <div class="dropdown-menu" aria-labelledby="modeDropdown">
-                    <a class="dropdown-item" href="#" data-mode="single">Single</a>
-                    <a class="dropdown-item" href="#" data-mode="live">Live</a>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -188,65 +159,17 @@
             <a href="https://github.com/alexpwrd/falcon-hackathon" target="_blank">
                 <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="32" height="32">
             </a>
-            <div class="footer-buttons">
-                <!-- 1. Custom Dropdown -->
-                <button id="settingsButton" class="btn btn-link p-0" type="button">
-                    <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
-                </button>
-                <div id="settingsDropdown" class="settings-dropdown">
-                    <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="debugSwitch1">
-                        <label class="custom-control-label" for="debugSwitch1">Debug Mode (Dropdown)</label>
-                    </div>
+            <button id="settingsButton" class="btn btn-link p-0" type="button">
+                <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
+            </button>
+            <div id="settingsDropdown" class="settings-dropdown">
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="debugSwitch">
+                    <label class="custom-control-label" for="debugSwitch">Debug Mode</label>
                 </div>
-
-                <!-- 2. Bootstrap Popover -->
-                <button id="popoverButton" class="btn btn-link p-0" type="button" data-toggle="popover" data-placement="top">
-                    <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
-                </button>
-
-                <!-- 3. Bootstrap Modal -->
-                <button id="modalButton" class="btn btn-link p-0" type="button" data-toggle="modal" data-target="#settingsModal">
-                    <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
-                </button>
-
-                <!-- 4. Inline toggle with collapsible section -->
-                <button class="btn btn-link p-0" type="button" data-toggle="collapse" data-target="#inlineSettings" aria-expanded="false" aria-controls="inlineSettings">
-                    <i class="bi bi-gear" style="font-size: 1.5rem; color: #6c757d;"></i>
-                </button>
             </div>
         </div>
     </footer>
-
-    <!-- Inline collapsible section -->
-    <div class="collapse" id="inlineSettings">
-        <div class="card card-body">
-            <div class="custom-control custom-switch">
-                <input type="checkbox" class="custom-control-input" id="debugSwitch4">
-                <label class="custom-control-label" for="debugSwitch4">Debug Mode (Inline)</label>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap Modal -->
-    <div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="debugSwitch3">
-                        <label class="custom-control-label" for="debugSwitch3">Debug Mode (Modal)</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -324,39 +247,25 @@
                 $(this).closest('.card').find('.card-body').slideToggle();
             });
 
-            // 1. Custom Dropdown
+            // Toggle settings dropdown
             $('#settingsButton').click(function(e) {
                 e.stopPropagation();
                 $('#settingsDropdown').toggle();
             });
 
+            // Close dropdown when clicking outside
             $(document).click(function() {
                 $('#settingsDropdown').hide();
             });
 
+            // Prevent dropdown from closing when clicking inside
             $('#settingsDropdown').click(function(e) {
                 e.stopPropagation();
             });
 
-            // 2. Bootstrap Popover
-            $('#popoverButton').popover({
-                html: true,
-                content: function() {
-                    return '<div class="custom-control custom-switch">' +
-                           '<input type="checkbox" class="custom-control-input" id="debugSwitch2">' +
-                           '<label class="custom-control-label" for="debugSwitch2">Debug Mode (Popover)</label>' +
-                           '</div>';
-                }
-            });
-
-            // Handle all debug switches
-            $('body').on('change', '#debugSwitch1, #debugSwitch2, #debugSwitch3, #debugSwitch4', function() {
+            // Handle debug switch toggle
+            $('#debugSwitch').change(function() {
                 $('.debug-card').toggle(this.checked);
-            });
-
-            // Prevent popover from closing when interacting with its content
-            $('body').on('click', '.popover', function(e) {
-                e.stopPropagation();
             });
         });
     </script>
