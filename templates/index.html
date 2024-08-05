@@ -205,11 +205,11 @@
         let countdownInterval;
 
         function updateCountdown(seconds) {
-            $('#systemMessage').text(`Next capture in ${seconds} seconds`);
+            updateSystemMessage(`Next capture in ${seconds} seconds`);
         }
 
         function processImage(isContinuous = false) {
-            $('#systemMessage').text('Processing image... Please wait.');
+            updateSystemMessage('Processing image... Please wait.');
             $('#captureButton').prop('disabled', true);
             $('#liveCaptureButton').prop('disabled', true);
             $('#resizedImage').hide();
@@ -223,9 +223,9 @@
                     $('#captureButton').prop('disabled', false);
                     $('#liveCaptureButton').prop('disabled', false);
                     if (response.error) {
-                        $('#systemMessage').text('Error: ' + response.error);
+                        updateSystemMessage('Error: ' + response.error);
                     } else {
-                        $('#systemMessage').text('Image processed successfully');
+                        updateSystemMessage('Image processed successfully');
                         if (response.description) {
                             $('#imageDescription').text(response.description);
                         }
@@ -242,7 +242,7 @@
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     $('#captureButton').prop('disabled', false);
-                    $('#systemMessage').text('Error: Failed to process image. Please try again.');
+                    updateSystemMessage('Error: Failed to process image. Please try again.');
                     console.error('Error:', textStatus, errorThrown);
                 },
                 complete: function() {
@@ -263,6 +263,10 @@
             });
         }
 
+        function updateSystemMessage(message) {
+            $('#systemMessage').text(message);
+        }
+
         $(document).ready(function() {
             setMode('live');
 
@@ -280,11 +284,11 @@
                     $('#captureButton').show();
                     $('#liveCaptureButton').hide();
                     stopLiveCapture();
-                    $('#systemMessage').text('Waiting for image capture...');
+                    updateSystemMessage('Waiting for image capture...');
                 } else {
                     $('#captureButton').hide();
                     $('#liveCaptureButton').show();
-                    $('#systemMessage').text('Click "Start Live Capture" to begin');
+                    updateSystemMessage('Click "Start Live Capture" to begin');
                 }
             }
 
@@ -305,7 +309,7 @@
                     processImage(true);
                 } else {
                     stopLiveCapture();
-                    $('#systemMessage').text('Live capture stopped');
+                    updateSystemMessage('Live capture stopped');
                 }
             });
 
