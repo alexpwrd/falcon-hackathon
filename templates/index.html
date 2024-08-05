@@ -79,6 +79,7 @@
     <script>
         let continuousProcessRunning = false;
         let countdownInterval;
+        let currentMode = 'live';
 
         function updateCountdown(seconds) {
             $('#countdown').text(`Next capture in ${seconds} seconds`).show();
@@ -149,9 +150,9 @@
         $(document).ready(function() {
             $('.dropdown-item').click(function(e) {
                 e.preventDefault();
-                let mode = $(this).data('mode');
+                currentMode = $(this).data('mode');
                 $('#selectedMode').text($(this).text());
-                if (mode === 'single') {
+                if (currentMode === 'single') {
                     continuousProcessRunning = false;
                     clearInterval(countdownInterval);
                     $('#countdown').hide();
@@ -162,8 +163,7 @@
             });
 
             $('#mainButton').click(function() {
-                let mode = $('#selectedMode').text();
-                if (mode === 'Single Capture') {
+                if (currentMode === 'single') {
                     processImage(false);
                 } else {
                     continuousProcessRunning = !continuousProcessRunning;
