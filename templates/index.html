@@ -159,6 +159,13 @@
             </div>
 
             <div class="card debug-card" style="display: none;">
+                <div class="card-header">System Message</div>
+                <div class="card-body" style="display: block;">
+                    <div id="systemMessage" class="code-block">waiting ...</div>
+                </div>
+            </div>
+
+            <div class="card debug-card" style="display: none;">
                 <div class="card-header dropdown-toggle">Image Description</div>
                 <div class="card-body">
                     <div id="imageDescription" class="code-block">...</div>
@@ -216,7 +223,7 @@
                     if (response.error) {
                         $('#systemMessage').text('Error: ' + response.error);
                     } else {
-                        $('#systemMessage').text('Success');
+                        $('#systemMessage').text('Done');
                         $('#imageDescription').text(response.description);
                         $('#instructions').text(response.instructions.trim());
                         if (response.resized_image_url) {
@@ -273,19 +280,23 @@
                 }
             }
 
-            $('#captureButton').click(() => processImage(false));
+            $('#captureButton').click(() => {
+                $('#systemMessage').text('Processing image... Please wait.');
+                processImage(false);
+            });
 
             function stopLiveCapture() {
                 continuousProcessRunning = false;
                 $('#liveCaptureButton').text('Start Live Capture').removeClass('btn-danger').addClass('btn-success');
                 clearInterval(countdownInterval);
-                $('#systemMessage').text('waiting ...');
+                $('#systemMessage').text('Live capture stopped');
             }
 
             $('#liveCaptureButton').click(function() {
                 if (!continuousProcessRunning) {
                     continuousProcessRunning = true;
                     $(this).text('Stop Live Capture').removeClass('btn-success').addClass('btn-danger');
+                    $('#systemMessage').text('Processing image... Please wait.');
                     processImage(true);
                 } else {
                     stopLiveCapture();
