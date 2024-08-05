@@ -152,30 +152,30 @@
                 <div class="card-header">Image</div>
                 <div class="card-body" style="display: block;">
                     <div id="imageContainer">
-                        <div id="noImage" class="code-block">...</div>
+                        <div id="noImage" class="code-block">No image captured yet</div>
                         <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
                     </div>
                 </div>
             </div>
 
-            <div class="card debug-card" style="display: none;">
+            <div class="card">
                 <div class="card-header">System Message</div>
                 <div class="card-body" style="display: block;">
-                    <div id="systemMessage" class="code-block">waiting ...</div>
+                    <div id="systemMessage" class="code-block">Waiting for image capture...</div>
                 </div>
             </div>
 
-            <div class="card debug-card" style="display: none;">
+            <div class="card">
                 <div class="card-header dropdown-toggle">Image Description</div>
                 <div class="card-body">
-                    <div id="imageDescription" class="code-block">...</div>
+                    <div id="imageDescription" class="code-block">No description available</div>
                 </div>
             </div>
 
-            <div class="card debug-card" style="display: none;">
+            <div class="card">
                 <div class="card-header dropdown-toggle">Instructions</div>
                 <div class="card-body">
-                    <div id="instructions" class="code-block">...</div>
+                    <div id="instructions" class="code-block">No instructions available</div>
                 </div>
             </div>
         </div>
@@ -211,18 +211,18 @@
         function processImage(isContinuous = false) {
             $('#systemMessage').text('Processing image... Please wait.');
             $('#captureButton').prop('disabled', true);
-            $('#liveCaptureButton').prop('disabled', false); // Ensure stop button is clickable
+            $('#liveCaptureButton').prop('disabled', false);
 
             $.ajax({
                 url: '/process_image',
                 method: 'POST',
-                timeout: 60000, // 60 seconds timeout
+                timeout: 60000,
                 success: function(response) {
                     $('#captureButton').prop('disabled', false);
                     if (response.error) {
                         $('#systemMessage').text('Error: ' + response.error);
                     } else {
-                        $('#systemMessage').text('Done');
+                        $('#systemMessage').text('Image processed successfully');
                         if (response.description) {
                             $('#imageDescription').text(response.description);
                         }
@@ -259,10 +259,8 @@
         }
 
         $(document).ready(function() {
-            // Set initial mode to 'Live'
             setMode('live');
 
-            // Mode selection in header
             $('.dropdown-item').click(function(e) {
                 e.preventDefault();
                 let mode = $(this).data('mode');
@@ -281,11 +279,11 @@
                 } else {
                     $('#captureButton').hide();
                     $('#liveCaptureButton').show();
+                    $('#systemMessage').text('Click "Start Live Capture" to begin');
                 }
             }
 
             $('#captureButton').click(() => {
-                $('#systemMessage').text('Processing image... Please wait.');
                 processImage(false);
             });
 
@@ -302,6 +300,7 @@
                     processImage(true);
                 } else {
                     stopLiveCapture();
+                    $('#systemMessage').text('Live capture stopped');
                 }
             });
 
@@ -309,28 +308,23 @@
                 $(this).closest('.card').find('.card-body').slideToggle();
             });
 
-            // Toggle settings dropdown
             $('#settingsButton').click(function(e) {
                 e.stopPropagation();
                 $('#settingsDropdown').toggle();
             });
 
-            // Close dropdown when clicking outside
             $(document).click(function() {
                 $('#settingsDropdown').hide();
             });
 
-            // Prevent dropdown from closing when clicking inside
             $('#settingsDropdown').click(function(e) {
                 e.stopPropagation();
             });
 
-            // Handle debug switch toggle
             $('#debugSwitch').change(function() {
                 $('.debug-card').toggle(this.checked);
             });
 
-            // Initially hide debug cards
             $('.debug-card').hide();
         });
     </script>
