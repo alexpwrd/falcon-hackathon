@@ -7,7 +7,23 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; min-height: 100vh; }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+        }
+        .content-wrapper {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            padding-top: 80px; /* Adjust based on header height */
+            flex-grow: 1;
+            overflow-y: auto;
+        }
         #resizedImage { max-width: 100%; height: auto; }
         .btn-custom { font-size: 18px; padding: 10px 20px; margin: 5px 0; width: 100%; }
         .card { margin-bottom: 20px; }
@@ -26,82 +42,107 @@
             font-size: 10px;
         }
         #output-container { 
-            flex-grow: 1;
             display: flex; 
             flex-direction: column; 
-            overflow-y: auto;
         }
         .card-body { display: none; }
-        .footer {
-            background-color: #f8f9fa;
-            padding: 10px 0;
-            margin-top: auto;
-        }
-        .dropdown-menu { font-size: 10px; }
         .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            z-index: 1000;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px 20px;
         }
         .header h1 { font-size: 24px; margin: 0; }
+        .dropdown-menu { font-size: 10px; }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 10px 0;
+            position: sticky;
+            bottom: 0;
+            width: 100%;
+            border-top: 1px solid #e0e0e0;
+        }
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Falcon Vision Aid</h1>
-        <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="modeDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Live
-            </button>
-            <div class="dropdown-menu" aria-labelledby="modeDropdown">
-                <a class="dropdown-item" href="#" data-mode="single">Single</a>
-                <a class="dropdown-item" href="#" data-mode="live">Live</a>
+        <div class="header-content">
+            <h1>Falcon Vision Aid</h1>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="modeDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Live
+                </button>
+                <div class="dropdown-menu" aria-labelledby="modeDropdown">
+                    <a class="dropdown-item" href="#" data-mode="single">Single</a>
+                    <a class="dropdown-item" href="#" data-mode="live">Live</a>
+                </div>
             </div>
         </div>
     </div>
 
-    <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">Capture New Image</button>
-    <button id="liveCaptureButton" class="btn btn-success btn-custom">Start Live Capture</button>
-    
-    <div id="output-container">
-        <div class="card">
-            <div class="card-header">Image</div>
-            <div class="card-body" style="display: block;">
-                <div id="imageContainer">
-                    <div id="noImage" class="code-block">...</div>
-                    <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
+    <div class="content-wrapper">
+        <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">Capture New Image</button>
+        <button id="liveCaptureButton" class="btn btn-success btn-custom">Start Live Capture</button>
+        
+        <div id="output-container">
+            <div class="card">
+                <div class="card-header">Image</div>
+                <div class="card-body" style="display: block;">
+                    <div id="imageContainer">
+                        <div id="noImage" class="code-block">...</div>
+                        <img id="resizedImage" alt="Resized image seen by AI" style="display: none;">
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card debug-card" style="display: none;">
-            <div class="card-header">Message</div>
-            <div class="card-body" style="display: block;">
-                <div id="systemMessage" class="code-block">waiting ...</div>
+            <div class="card debug-card" style="display: none;">
+                <div class="card-header">Message</div>
+                <div class="card-body" style="display: block;">
+                    <div id="systemMessage" class="code-block">waiting ...</div>
+                </div>
             </div>
-        </div>
 
-        <div class="card debug-card" style="display: none;">
-            <div class="card-header dropdown-toggle">Image Description</div>
-            <div class="card-body">
-                <div id="imageDescription" class="code-block">...</div>
+            <div class="card debug-card" style="display: none;">
+                <div class="card-header dropdown-toggle">Image Description</div>
+                <div class="card-body">
+                    <div id="imageDescription" class="code-block">...</div>
+                </div>
             </div>
-        </div>
 
-        <div class="card debug-card" style="display: none;">
-            <div class="card-header dropdown-toggle">Instructions</div>
-            <div class="card-body">
-                <div id="instructions" class="code-block">...</div>
+            <div class="card debug-card" style="display: none;">
+                <div class="card-header dropdown-toggle">Instructions</div>
+                <div class="card-body">
+                    <div id="instructions" class="code-block">...</div>
+                </div>
             </div>
         </div>
     </div>
 
     <footer class="footer">
-        <div class="container">
+        <div class="footer-content">
+            <span>Debug Mode</span>
             <div class="custom-control custom-switch">
                 <input type="checkbox" class="custom-control-input" id="debugSwitch">
-                <label class="custom-control-label" for="debugSwitch">Debug Mode</label>
+                <label class="custom-control-label" for="debugSwitch"></label>
             </div>
         </div>
     </footer>
