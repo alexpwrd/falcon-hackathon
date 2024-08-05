@@ -11,6 +11,7 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 import threading
 from flask_socketio import SocketIO
 import time
+import asyncio
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -166,17 +167,22 @@ def generate_instructions(image_description):
             logger.error(f"Falcon: Response content: {e.response.content}")
         return "I'm sorry, I couldn't generate instructions at this time."
 
-def speak_text(text):
+async def speak_text_async(text):
     try:
-        subprocess.run(['termux-tts-speak', text], check=True)
+        process = await asyncio.create_subprocess_exec(
+            'termux-tts-speak', text,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        await process.communicate()
         logger.info(f"Text spoken successfully: {text[:50]}...")
         return True
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
         logger.error(f"Error speaking text: {e}")
         return False
 
-def process_image():
-    image_path = take_photo()  # Use front camera (camera_id=1)
+async def process_image_async():
+    image_path = take_photo()
     if image_path and os.path.exists(image_path):
         file_size_mb = check_file_size(image_path)
         image_format = check_image_format(image_path)
@@ -198,8 +204,8 @@ def process_image():
         logger.info(f"Full image description: {image_description}")
         logger.info(f"Full instructions: {instructions}")
         
-        # Speak the Falcon instructions and get the result
-        instructions_spoken = speak_text(instructions)
+        # Use the async version of speak_text
+        instructions_spoken = await speak_text_async(instructions)
         
         return {
             "description": image_description, 
@@ -211,13 +217,19 @@ def process_image():
         logger.error("Failed to take photo or photo file not found")
         return {"error": "Failed to take photo or photo file not found"}
 
+@socketio.on('request_image')
+async def handle_request_image():
+    if continuous_process_running:
+        result = await process_image_async()
+        socketio.emit('continuous_result', result)
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/process_image', methods=['POST'])
-def process_image_route():
-    result = process_image()
+async def process_image_route():
+    result = await process_image_async()
     return jsonify(result)
 
 @app.route('/continuous_process', methods=['POST'])
@@ -225,16 +237,15 @@ def continuous_process():
     global continuous_process_running
     continuous_process_running = True
 
-    def run_continuous_process():
+    async def run_continuous_process():
         while continuous_process_running:
-            result = process_image()
-            if result.get("error"):
-                socketio.emit('continuous_result', result)
-                break
+            result = await process_image_async()
             socketio.emit('continuous_result', result)
-            time.sleep(5)  # Sleep for 5 seconds before capturing the next image
+            if result.get("error"):
+                break
+            await asyncio.sleep(0.1)  # Small delay to prevent overwhelming the system
 
-    threading.Thread(target=run_continuous_process).start()
+    socketio.start_background_task(run_continuous_process)
     return jsonify({"status": "Continuous process started"})
 
 @app.route('/stop_continuous_process', methods=['POST'])
@@ -248,4 +259,4 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == "__main__":
-    socketio.run(app, host='127.0.0.1', port=5001, debug=True)
+    socketio.run(app, host='127.0.0.1', port=5001, debug=True, async_mode='asyncio')
