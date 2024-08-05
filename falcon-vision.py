@@ -46,14 +46,14 @@ socketio = SocketIO(app)
 
 continuous_process_running = False
 
-def take_photo(camera_id=0, filename='visionAId.jpg', filepath='~/storage/dcim/', resolution='800x600'):
+def take_photo(camera_id=0, filename='visionAId.jpg', filepath='/data/data/com.termux/files/home/storage/dcim/', resolution='800x600'):
     _path = os.path.join(filepath, filename)
     _path = os.path.expanduser(_path)  # Expand the ~ in the filepath
     logger.info(f"Taking photo with camera ID {camera_id}")
     logger.info(f"Saving photo to {_path}")
     cmd = f"termux-camera-photo -c {camera_id} {_path}"
     try:
-        subprocess.call(cmd, shell=True)
+        subprocess.run(cmd, shell=True, check=True)
         logger.info(f"Photo saved to {_path}")
         return _path
     except subprocess.CalledProcessError as e:
@@ -82,8 +82,8 @@ def resize_and_encode_image(image_path, target_size="512x512"):
         # Ensure the upload folder exists
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
         
-        # Resize image using ImageMagick's magick convert command
-        subprocess.run(['magick', 'convert', image_path, '-resize', target_size+'^', '-gravity', 'center', '-extent', target_size, resized_path], check=True)
+        # Resize image using ImageMagick's convert command (note: 'magick' might not be needed in Termux)
+        subprocess.run(['convert', image_path, '-resize', target_size+'^', '-gravity', 'center', '-extent', target_size, resized_path], check=True)
         logger.info(f"Image resized and saved to {resized_path}")
         
         # Read and encode the resized image
@@ -248,4 +248,4 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == "__main__":
-    socketio.run(app, host='0.0.0.0', port=5001, debug=True)
+    socketio.run(app, host='127.0.0.1', port=5001, debug=True)
