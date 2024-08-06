@@ -171,46 +171,47 @@ def generate_image_description(image_path):
 
 
 def generate_instructions(image_description):
-    logger.info("Falcon: Generating instructions based on image description")
+    logger.info("Falcon: Generating concise instructions based on image description")
     payload = {
         "model": "tiiuae/falcon-180B-chat",
         "messages": [
             {
                 "role": "system",
                 "content": '''
-                You are an AI assistant helping a blind person understand their surroundings.
-                Provide very brief, clear information about nearby obstacles, people, and potential dangers.
-                Use metric distances. Do not give directional instructions.
+                You are an AI assistant providing critical safety information to a blind person.
+                Focus only on immediate dangers and very close obstacles within 2/3 meters.
+                Use extremely concise language. Prioritize safety over completeness.
                 ''',
             },
             {
                 "role": "user",
                 "content": f"""
-                Based on this image description, briefly describe the immediate surroundings for a blind person:
+                Based on this image description, provide critical safety information:
                 {image_description}
-                Focus only on:
-                1. Nearby obstacles (within 5 meters)
-                2. People in close proximity
-                3. Potential dangers
-                4. Approximate distances using the metric system
-                Do not suggest any movements or directions. Keep it under 50 words.
+                Rules:
+                1. Mention ONLY obstacles or people within 2 meters.
+                2. Prioritize potential dangers.
+                3. Use metric distances.
+                4. No directional instructions.
+                5. Extremely brief - aim for 20-25 words maximum.
                 """,
             },
         ],
-        "max_tokens": 100,
+        "max_tokens": 50,
+        "temperature": 0.5,
     }
 
     try:
         response = requests.post(FALCON_API_URL, headers=FALCON_HEADERS, json=payload)
         response.raise_for_status()
         instructions = response.json()["choices"][0]["message"]["content"]
-        logger.info(f"Falcon: Generated instructions: {instructions[:100]}...")
+        logger.info(f"Falcon: Generated instructions: {instructions}")
         return instructions
     except requests.exceptions.RequestException as e:
         logger.error(f"Falcon: Error in API request: {e}")
         if hasattr(e, "response") and e.response is not None:
             logger.error(f"Falcon: Response content: {e.response.content}")
-        return "I'm sorry, I couldn't analyze the surroundings at this time."
+        return "Error analyzing surroundings. Please try again."
 
 
 def speak_text(text):
