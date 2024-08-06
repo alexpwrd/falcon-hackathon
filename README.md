@@ -2,6 +2,10 @@
 
 This project is a vision aid application that uses AI to describe images and provide navigation instructions for visually impaired users. It's designed to run on Android devices using Termux, but can also be set up in a local environment.
 
+## App Preview
+
+![Falcon Vision Aid App Preview](app_preview.png)
+
 ## Setup on Android with Termux
 
 1. Install Termux from F-Droid:
