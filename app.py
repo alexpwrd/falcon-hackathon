@@ -178,19 +178,22 @@ def generate_instructions(image_description):
             {
                 "role": "system",
                 "content": '''
-                You are an AI assistant helping a blind person navigate.
-                Provide very brief, clear instructions for safe movement based on the image description.
+                You are an AI assistant helping a blind person understand their surroundings.
+                Provide very brief, clear information about nearby obstacles, people, and potential dangers.
+                Use metric distances. Do not give directional instructions.
                 ''',
             },
             {
                 "role": "user",
                 "content": f"""
-                Based on this image description,
-                what should a blind person do next? Keep it brief. Image description: {image_description},
-                a special attention on avoiding obstacles, people, and other dangers.
-                do not assume where the person is going, just describe what to avoid, how to move and approx distance.
-                use metric system for distances.
-                Do not say move forward, move left, move right, etc. just state the surrounding.
+                Based on this image description, briefly describe the immediate surroundings for a blind person:
+                {image_description}
+                Focus only on:
+                1. Nearby obstacles (within 5 meters)
+                2. People in close proximity
+                3. Potential dangers
+                4. Approximate distances using the metric system
+                Do not suggest any movements or directions. Keep it under 50 words.
                 """,
             },
         ],
@@ -207,7 +210,7 @@ def generate_instructions(image_description):
         logger.error(f"Falcon: Error in API request: {e}")
         if hasattr(e, "response") and e.response is not None:
             logger.error(f"Falcon: Response content: {e.response.content}")
-        return "I'm sorry, I couldn't generate instructions at this time."
+        return "I'm sorry, I couldn't analyze the surroundings at this time."
 
 
 def speak_text(text):
