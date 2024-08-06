@@ -48,7 +48,7 @@
             width: 360px;
             height: 360px;
             border-radius: 50%;
-            font-size: 16px;
+            font-size: 24px;
             font-weight: bold;
             margin: 20px auto;
             display: flex;
@@ -59,6 +59,7 @@
             white-space: normal;
             padding: 20px;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .btn-custom:hover {
@@ -68,7 +69,14 @@
 
         .btn-custom i {
             font-size: 120px;
-            margin-bottom: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn-custom span {
+            margin-top: 140px;
         }
 
         #captureButton, #liveCaptureButton {
@@ -164,6 +172,9 @@
             padding-top: 0.2rem;
             font-size: 14px;
         }
+        #imageCard {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -187,16 +198,16 @@
         <div class="button-container">
             <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">
                 <i class="bi bi-eye"></i>
-                Capture New Image
+                <span>Capture New Image</span>
             </button>
             <button id="liveCaptureButton" class="btn btn-success btn-custom">
                 <i class="bi bi-eye"></i>
-                Start Live Capture
+                <span>Start Live Capture</span>
             </button>
         </div>
         
         <div id="output-container">
-            <div class="card">
+            <div id="imageCard" class="card">
                 <div class="card-header">Image</div>
                 <div class="card-body" style="display: block;">
                     <div id="imageContainer">
@@ -354,14 +365,14 @@
 
             function stopLiveCapture() {
                 continuousProcessRunning = false;
-                $('#liveCaptureButton').html('<i class="bi bi-eye"></i>Start Live Capture').removeClass('btn-danger').addClass('btn-success');
+                $('#liveCaptureButton').html('<i class="bi bi-eye"></i><span>Start Live Capture</span>').removeClass('btn-danger').addClass('btn-success');
                 clearInterval(countdownInterval);
             }
 
             $('#liveCaptureButton').click(function() {
                 if (!continuousProcessRunning) {
                     continuousProcessRunning = true;
-                    $(this).html('<i class="bi bi-eye"></i>Stop Live Capture').removeClass('btn-success').addClass('btn-danger');
+                    $(this).html('<i class="bi bi-eye"></i><span>Stop Live Capture</span>').removeClass('btn-success').addClass('btn-danger');
                     processImage(true);
                 } else {
                     stopLiveCapture();
@@ -371,21 +382,24 @@
 
             $('#debugSwitch').change(function() {
                 if (this.checked) {
-                    // Show all debug cards
+                    // Show all debug cards and the image card
                     $('.debug-card').show();
+                    $('#imageCard').show();
                     // Ensure image description and instructions cards are collapsed
                     $('#imageDescriptionBody, #instructionsBody').collapse('hide');
                 } else {
-                    // Hide all debug cards when debug mode is off
+                    // Hide all debug cards and the image card when debug mode is off
                     $('.debug-card').hide();
+                    $('#imageCard').hide();
                 }
             });
 
             // Remove the click handler for dropdown-toggle, as Bootstrap will handle it
             $('.debug-card .card-header.dropdown-toggle').off('click');
 
-            // Initially hide debug cards
+            // Initially hide debug cards and image card
             $('.debug-card').hide();
+            $('#imageCard').hide();
 
             // Ensure the image card is always visible
             $('.card:not(.debug-card)').show().find('.card-body').show();
