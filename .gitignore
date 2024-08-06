@@ -38,3 +38,8 @@ build/
 # Temporary files
 *.tmp
 *.bak
+templates/btn/src/style.sass
+templates/btn/src/script.js
+templates/btn/src/index.pug
+templates/btn/README.md
+templates/btn/LICENSE.txt
