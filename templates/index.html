@@ -63,12 +63,6 @@
             white-space: normal;
             padding: 20px;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            border: none;
-            cursor: pointer;
-            background: #000;
-            color: #fff;
         }
 
         .btn-custom:hover {
@@ -78,54 +72,6 @@
         .btn-custom i {
             font-size: 120px;
             margin-bottom: 20px;
-        }
-
-        .btn-custom span {
-            position: relative;
-            z-index: 1;
-        }
-
-        .btn-custom::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            width: calc(100% + 4px);
-            height: calc(100% + 4px);
-            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-            background-size: 400%;
-            z-index: -1;
-            animation: glowing 20s linear infinite;
-        }
-
-        @keyframes glowing {
-            0% { background-position: 0 0; }
-            50% { background-position: 400% 0; }
-            100% { background-position: 0 0; }
-        }
-
-        .btn-custom::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: calc(100% - 4px);
-            height: calc(100% - 4px);
-            background: #000;
-            border-radius: 50%;
-            z-index: 0;
-        }
-
-        .btn-custom.btn-primary::after {
-            background: #007bff;
-        }
-
-        .btn-custom.btn-success::after {
-            background: #28a745;
-        }
-
-        .btn-custom.btn-danger::after {
-            background: #dc3545;
         }
 
         #captureButton, #liveCaptureButton {
