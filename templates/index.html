@@ -140,7 +140,6 @@
             font-weight: bold;
             text-align: center;
             flex-grow: 1;
-            margin-right: 100px; /* Add right margin to center the title */
         }
         .footer {
             background-color: #f8f9fa;
@@ -343,12 +342,12 @@
             <img width="24" height="24" src="https://img.icons8.com/external-others-inmotus-design/67/1A1A1A/external-Eagle-eagle-others-inmotus-design-3.png" alt="external-Eagle-eagle-others-inmotus-design-3"/>
             <h1>Falcon Vision Aid</h1>
             <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="modeDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Live
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="modeDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Live&nbsp;&nbsp;
                 </button>
-                <div class="dropdown-menu w-100" aria-labelledby="modeDropdown">
+                <div class="dropdown-menu" aria-labelledby="modeDropdown">
                     <a class="dropdown-item" href="#" data-mode="single">Single</a>
-                    <a class="dropdown-item active" href="#" data-mode="live">Live</a>
+                    <a class="dropdown-item active" href="#" data-mode="live">Live&nbsp;&nbsp;</a>
                 </div>
             </div>
         </div>
@@ -517,7 +516,7 @@
             });
 
             function setMode(mode) {
-                $('#modeDropdown').text(mode.charAt(0).toUpperCase() + mode.slice(1));
+                $('#modeDropdown').html(mode.charAt(0).toUpperCase() + mode.slice(1) + (mode === 'live' ? '&nbsp;&nbsp;' : ''));
                 $('.dropdown-item').removeClass('active');
                 $(`.dropdown-item[data-mode="${mode}"]`).addClass('active');
                 if (mode === 'single') {
