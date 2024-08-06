@@ -39,7 +39,6 @@
             width: 100%;
             margin: 0 auto;
             padding: 0 20px;
-            padding-top: 60px; /* Reduced padding-top */
             flex-grow: 1;
             overflow-y: auto;
             display: flex;
@@ -104,7 +103,7 @@
         #output-container {
             display: flex; 
             flex-direction: column;
-            margin-top: 420px; /* Adjust this value based on your button height */
+            width: 100%;
         }
         .card-body { display: none; }
         .debug-card { display: none; }
@@ -326,10 +325,8 @@
 
         /* Add a new style for the button wrapper */
         .button-wrapper {
-            position: fixed;
+            position: sticky;
             top: 60px; /* Adjust this value to match your header height */
-            left: 0;
-            right: 0;
             z-index: 999;
             background-color: white;
             padding: 10px 0;
@@ -354,30 +351,30 @@
         </div>
     </div>
 
-    <div class="button-wrapper">
-        <div class="button-container">
-            <div class="toggle-button-container">
-                <div id="captureButton" class="toggle-button blue">
-                    <input type="button">
-                    <span class="button"></span>
-                    <div class="label">
-                        <i class="bi bi-eye"></i>
+    <div class="content-wrapper">
+        <div class="button-wrapper">
+            <div class="button-container">
+                <div class="toggle-button-container">
+                    <div id="captureButton" class="toggle-button blue">
+                        <input type="button">
+                        <span class="button"></span>
+                        <div class="label">
+                            <i class="bi bi-eye"></i>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="toggle-button-container">
-                <div id="liveCaptureButton" class="toggle-button start-stop">
-                    <input type="checkbox">
-                    <span class="button"></span>
-                    <div class="label">
-                        <i class="bi bi-eye"></i>
+                <div class="toggle-button-container">
+                    <div id="liveCaptureButton" class="toggle-button start-stop">
+                        <input type="checkbox">
+                        <span class="button"></span>
+                        <div class="label">
+                            <i class="bi bi-eye"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="content-wrapper">
         <div id="output-container">
             <div id="imageCard" class="card debug-card">
                 <div class="card-header">Image</div>
