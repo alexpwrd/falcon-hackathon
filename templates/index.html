@@ -229,7 +229,11 @@
           transform: translate(-50%, -50%);
         }
         .toggle-button .label .text {
-          display: none; /* Hide the text */
+          font-size: 24px;
+          position: absolute;
+          bottom: 30px;
+          left: 50%;
+          transform: translateX(-50%);
         }
         .toggle-button input {
           position: absolute;
@@ -265,9 +269,6 @@
           text-shadow: 1px 1px 3px #1976D2, 0 0 0 #ffffff, 1px 1px 4px #64B5F6;
         }
         .toggle-button.blue input:active ~ .button {
-          box-shadow: 0 15px 25px -4px rgba(0, 0, 0, 0.2), inset 0 -8px 30px 1px rgba(100, 181, 246, 0.9), 0 -10px 15px -1px rgba(100, 181, 246, 0.8), inset 0 8px 25px 0 rgba(0, 0, 0, 0.2), inset 0 0 10px 1px rgba(255, 255, 255, 0.8);
-        }
-        .toggle-button.blue.clicked .button {
           box-shadow: 0 15px 25px -4px rgba(0, 0, 0, 0.2), inset 0 -8px 30px 1px rgba(100, 181, 246, 0.9), 0 -10px 15px -1px rgba(100, 181, 246, 0.8), inset 0 8px 25px 0 rgba(0, 0, 0, 0.2), inset 0 0 10px 1px rgba(255, 255, 255, 0.8);
         }
 
@@ -330,7 +331,7 @@
                     <input type="button">
                     <span class="button"></span>
                     <div class="label">
-                        <i class="bi bi-camera"></i>
+                        <i class="bi bi-eye"></i>
                     </div>
                 </div>
             </div>
@@ -339,7 +340,7 @@
                     <input type="checkbox">
                     <span class="button"></span>
                     <div class="label">
-                        <i class="bi bi-camera-video"></i>
+                        <i class="bi bi-eye"></i>
                     </div>
                 </div>
             </div>
@@ -426,7 +427,7 @@
                 method: 'POST',
                 timeout: 60000,
                 success: function(response) {
-                    $('#captureButton').prop('disabled', false).removeClass('clicked');
+                    $('#captureButton').prop('disabled', false);
                     $('#liveCaptureButton').prop('disabled', false);
                     if (response.error) {
                         updateSystemMessage('Error: ' + response.error);
@@ -447,7 +448,7 @@
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    $('#captureButton').prop('disabled', false).removeClass('clicked');
+                    $('#captureButton').prop('disabled', false);
                     updateSystemMessage('Error: Failed to process image. Please try again.');
                     console.error('Error:', textStatus, errorThrown);
                 },
@@ -498,17 +499,13 @@
                 }
             }
 
-            $('#captureButton').click(function() {
-                if (!$(this).hasClass('clicked')) {
-                    $(this).addClass('clicked');
-                    processImage(false);
-                }
+            $('#captureButton').click(() => {
+                processImage(false);
             });
 
             function stopLiveCapture() {
                 continuousProcessRunning = false;
                 $('#liveCaptureButton').removeClass('checked');
-                $('#liveCaptureButton input').prop('checked', false);
                 clearInterval(countdownInterval);
             }
 
