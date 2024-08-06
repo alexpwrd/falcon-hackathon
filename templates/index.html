@@ -53,7 +53,7 @@
             width: 360px;
             height: 360px;
             border-radius: 50%;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             margin: 20px auto;
             display: flex;
@@ -91,9 +91,8 @@
         .button-container {
             display: flex;
             justify-content: center;
-            align-items: center;
-            flex-grow: 1;
-            width: 100%;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
         }
         .card { margin-bottom: 20px; }
         .card-header { 
@@ -110,10 +109,9 @@
             white-space: pre-wrap; 
             font-size: 10px;
         }
-        #output-container {
-            width: 100%;
-            max-width: 800px;
-            margin-top: 40px;
+        #output-container { 
+            display: flex; 
+            flex-direction: column; 
         }
         .card-body { display: none; }
         .debug-card { display: none; }
@@ -214,7 +212,7 @@
         </div>
         
         <div id="output-container">
-            <div id="imageCard" class="card">
+            <div id="imageCard" class="card debug-card">
                 <div class="card-header">Image</div>
                 <div class="card-body" style="display: block;">
                     <div id="imageContainer">
@@ -391,22 +389,19 @@
                 if (this.checked) {
                     // Show all debug cards and the image card
                     $('.debug-card').show();
-                    $('#imageCard').show();
                     // Ensure image description and instructions cards are collapsed
                     $('#imageDescriptionBody, #instructionsBody').collapse('hide');
                 } else {
-                    // Hide all debug cards and the image card when debug mode is off
+                    // Hide all debug cards when debug mode is off
                     $('.debug-card').hide();
-                    $('#imageCard').hide();
                 }
             });
 
             // Remove the click handler for dropdown-toggle, as Bootstrap will handle it
             $('.debug-card .card-header.dropdown-toggle').off('click');
 
-            // Initially hide debug cards and image card
+            // Initially hide all debug cards
             $('.debug-card').hide();
-            $('#imageCard').hide();
 
             // Ensure the image card is always visible
             $('.card:not(.debug-card)').show().find('.card-body').show();
