@@ -176,19 +176,13 @@
         /* New button styles */
         .toggle-button-container {
           display: inline-block;
-          margin: 10px; /* Reduced margin */
+          margin: 20px;
         }
         .toggle-button {
           position: relative;
           width: 400px;
           height: 400px;
-          background: radial-gradient(circle, 
-            rgba(240, 240, 240, 0.9) 15%, 
-            rgba(240, 240, 240, 0.6) 30%, 
-            rgba(240, 240, 240, 0.2) 50%, 
-            rgba(240, 240, 240, 0.05) 70%, 
-            rgba(240, 240, 240, 0) 90%
-          );
+          background: radial-gradient(circle, rgba(240, 240, 240, 0.9) 15%, rgba(240, 240, 240, 0.6) 30%, rgba(240, 240, 240, 0.2) 50%, rgba(240, 240, 240, 0.05) 70%, rgba(240, 240, 240, 0) 100%);
         }
         .toggle-button:before {
           content: "";
@@ -251,13 +245,7 @@
 
         /* Blue Button */
         .toggle-button.blue {
-          background: radial-gradient(circle, 
-            rgba(33, 150, 243, 0.9) 15%, 
-            rgba(33, 150, 243, 0.6) 30%, 
-            rgba(33, 150, 243, 0.2) 50%, 
-            rgba(33, 150, 243, 0.05) 70%, 
-            rgba(33, 150, 243, 0) 90%
-          );
+          background: radial-gradient(circle, rgba(33, 150, 243, 0.9) 15%, rgba(33, 150, 243, 0.6) 30%, rgba(33, 150, 243, 0.2) 50%, rgba(33, 150, 243, 0.05) 70%, rgba(33, 150, 243, 0) 100%);
           transition: background 300ms ease-out;
         }
         .toggle-button.blue:before {
@@ -288,13 +276,7 @@
 
         /* Start-Stop Button */
         .toggle-button.start-stop {
-          background: radial-gradient(circle, 
-            rgba(76, 175, 80, 0.9) 15%, 
-            rgba(76, 175, 80, 0.6) 30%, 
-            rgba(76, 175, 80, 0.2) 50%, 
-            rgba(76, 175, 80, 0.05) 70%, 
-            rgba(76, 175, 80, 0) 90%
-          );
+          background: radial-gradient(circle, rgba(76, 175, 80, 0.9) 15%, rgba(76, 175, 80, 0.6) 30%, rgba(76, 175, 80, 0.2) 50%, rgba(76, 175, 80, 0.05) 70%, rgba(76, 175, 80, 0) 100%);
           transition: background 300ms ease-out;
         }
         .toggle-button.start-stop:before {
@@ -322,16 +304,6 @@
           color: #ffffff;
           text-shadow: 1px 1px 3px #D32F2F, 0 0 0 #ffffff, 1px 1px 4px #EF9A9A;
         }
-
-        /* Add a new style for the button wrapper */
-        .button-wrapper {
-            position: sticky;
-            top: 60px; /* Adjust this value to match your header height */
-            z-index: 999;
-            background-color: white;
-            padding: 10px 0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
     </style>
 </head>
 <body>
@@ -352,24 +324,22 @@
     </div>
 
     <div class="content-wrapper">
-        <div class="button-wrapper">
-            <div class="button-container">
-                <div class="toggle-button-container">
-                    <div id="captureButton" class="toggle-button blue">
-                        <input type="button">
-                        <span class="button"></span>
-                        <div class="label">
-                            <i class="bi bi-eye"></i>
-                        </div>
+        <div class="button-container">
+            <div class="toggle-button-container">
+                <div id="captureButton" class="toggle-button blue">
+                    <input type="button">
+                    <span class="button"></span>
+                    <div class="label">
+                        <i class="bi bi-eye"></i>
                     </div>
                 </div>
-                <div class="toggle-button-container">
-                    <div id="liveCaptureButton" class="toggle-button start-stop">
-                        <input type="checkbox">
-                        <span class="button"></span>
-                        <div class="label">
-                            <i class="bi bi-eye"></i>
-                        </div>
+            </div>
+            <div class="toggle-button-container">
+                <div id="liveCaptureButton" class="toggle-button start-stop">
+                    <input type="checkbox">
+                    <span class="button"></span>
+                    <div class="label">
+                        <i class="bi bi-eye"></i>
                     </div>
                 </div>
             </div>
