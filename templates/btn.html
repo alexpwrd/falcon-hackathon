@@ -11,10 +11,9 @@
     }
     .toggle-button {
       position: relative;
-      width: 300px;
-      height: 300px;
-      border-radius: 16px;
-      box-shadow: inset 0 0 35px 5px rgba(0, 0, 0, 0.15), inset 0 2px 1px 1px rgba(255, 255, 255, 0.9), inset 0 -2px 1px 0 rgba(0, 0, 0, 0.15);
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(240, 240, 240, 0.9) 15%, rgba(240, 240, 240, 0.6) 30%, rgba(240, 240, 240, 0.2) 50%, rgba(240, 240, 240, 0.05) 70%, rgba(240, 240, 240, 0) 100%);
     }
     .toggle-button:before {
       content: "";
@@ -61,13 +60,6 @@
       left: 50%;
       transform: translate(-50%, -50%);
     }
-    .toggle-button .label .text {
-      font-size: 24px;
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
     .toggle-button input {
       position: absolute;
       opacity: 0;
@@ -81,16 +73,13 @@
     .toggle-button input:active ~ .label i {
       font-size: 138px;
     }
-    .toggle-button input:active ~ .label .text {
-      font-size: 22px;
-    }
 
     /* Neutral Button */
     .toggle-button.neutral {
-      background: #f0f0f0;
+      background: radial-gradient(circle, rgba(240, 240, 240, 0.9) 15%, rgba(240, 240, 240, 0.6) 30%, rgba(240, 240, 240, 0.2) 50%, rgba(240, 240, 240, 0.05) 70%, rgba(240, 240, 240, 0) 100%);
     }
     .toggle-button.neutral:before {
-      background: #fff;
+      background: transparent;
     }
     .toggle-button.neutral .button {
       background: #f8f8f8;
@@ -109,11 +98,11 @@
 
     /* Start-Stop Button */
     .toggle-button.start-stop {
-      background: #4CAF50;
+      background: radial-gradient(circle, rgba(76, 175, 80, 0.9) 15%, rgba(76, 175, 80, 0.6) 30%, rgba(76, 175, 80, 0.2) 50%, rgba(76, 175, 80, 0.05) 70%, rgba(76, 175, 80, 0) 100%);
       transition: background 300ms ease-out;
     }
     .toggle-button.start-stop:before {
-      background: #81C784;
+      background: transparent;
     }
     .toggle-button.start-stop .button {
       background: #66BB6A;
@@ -127,10 +116,7 @@
       box-shadow: 0 15px 25px -4px rgba(0, 0, 0, 0.2), inset 0 -8px 30px 1px rgba(129, 199, 132, 0.9), 0 -10px 15px -1px rgba(129, 199, 132, 0.8), inset 0 8px 25px 0 rgba(0, 0, 0, 0.2), inset 0 0 10px 1px rgba(255, 255, 255, 0.8);
     }
     .toggle-button.start-stop.checked {
-      background: #F44336;
-    }
-    .toggle-button.start-stop.checked:before {
-      background: #EF9A9A;
+      background: radial-gradient(circle, rgba(244, 67, 54, 0.9) 15%, rgba(244, 67, 54, 0.6) 30%, rgba(244, 67, 54, 0.2) 50%, rgba(244, 67, 54, 0.05) 70%, rgba(244, 67, 54, 0) 100%);
     }
     .toggle-button.start-stop.checked .button {
       background: #EF5350;
@@ -143,11 +129,11 @@
 
     /* Blue Button */
     .toggle-button.blue {
-      background: #2196F3;
+      background: radial-gradient(circle, rgba(33, 150, 243, 0.9) 15%, rgba(33, 150, 243, 0.6) 30%, rgba(33, 150, 243, 0.2) 50%, rgba(33, 150, 243, 0.05) 70%, rgba(33, 150, 243, 0) 100%);
       transition: background 300ms ease-out;
     }
     .toggle-button.blue:before {
-      background: #64B5F6;
+      background: transparent;
     }
     .toggle-button.blue .button {
       background: #42A5F5;
@@ -161,10 +147,7 @@
       box-shadow: 0 15px 25px -4px rgba(0, 0, 0, 0.2), inset 0 -8px 30px 1px rgba(100, 181, 246, 0.9), 0 -10px 15px -1px rgba(100, 181, 246, 0.8), inset 0 8px 25px 0 rgba(0, 0, 0, 0.2), inset 0 0 10px 1px rgba(255, 255, 255, 0.8);
     }
     .toggle-button.blue.checked {
-      background: #E3F2FD;
-    }
-    .toggle-button.blue.checked:before {
-      background: #E3F2FD;
+      background: radial-gradient(circle, rgba(227, 242, 253, 0.9) 15%, rgba(227, 242, 253, 0.6) 30%, rgba(227, 242, 253, 0.2) 50%, rgba(227, 242, 253, 0.05) 70%, rgba(227, 242, 253, 0) 100%);
     }
     .toggle-button.blue.checked .button {
       background: #E3F2FD;
@@ -183,7 +166,6 @@
       <span class="button"></span>
       <div class="label">
         <i class="bi bi-eye"></i>
-        <span class="text">Neutral</span>
       </div>
     </div>
   </div>
@@ -194,7 +176,6 @@
       <span class="button"></span>
       <div class="label">
         <i class="bi bi-eye"></i>
-        <span class="text">Start</span>
       </div>
     </div>
   </div>
@@ -205,7 +186,6 @@
       <span class="button"></span>
       <div class="label">
         <i class="bi bi-eye"></i>
-        <span class="text">Blue</span>
       </div>
     </div>
   </div>
@@ -214,11 +194,6 @@
     document.querySelectorAll('.toggle-button input').forEach(input => {
       input.addEventListener('change', function() {
         const button = this.closest('.toggle-button');
-        const label = button.querySelector('.label .text');
-        
-        if (button.classList.contains('start-stop')) {
-          label.textContent = this.checked ? 'Stop' : 'Start';
-        }
         
         if (this.checked) {
           button.classList.add('checked');
