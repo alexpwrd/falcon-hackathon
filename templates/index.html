@@ -416,7 +416,8 @@
 
         function processImage(isContinuous = false) {
             updateSystemMessage('Processing image... Please wait.');
-            $('#captureButton').prop('disabled', true);
+            $('#captureButton').addClass('pressed checked');  // Add pressed and checked state
+            $('#captureButton input').prop('disabled', true);
             $('#liveCaptureButton').prop('disabled', true);
             $('#resizedImage').hide();
             $('#noImage').show();
@@ -426,7 +427,8 @@
                 method: 'POST',
                 timeout: 60000,
                 success: function(response) {
-                    $('#captureButton').prop('disabled', false);
+                    $('#captureButton').removeClass('pressed checked');  // Remove pressed and checked state
+                    $('#captureButton input').prop('disabled', false);
                     $('#liveCaptureButton').prop('disabled', false);
                     if (response.error) {
                         updateSystemMessage('Error: ' + response.error);
@@ -447,7 +449,8 @@
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    $('#captureButton').prop('disabled', false);
+                    $('#captureButton').removeClass('pressed checked');  // Remove pressed and checked state
+                    $('#captureButton input').prop('disabled', false);
                     updateSystemMessage('Error: Failed to process image. Please try again.');
                     console.error('Error:', textStatus, errorThrown);
                 },
@@ -498,8 +501,10 @@
                 }
             }
 
-            $('#captureButton').click(() => {
-                processImage(false);
+            $('#captureButton').click(function() {
+                if (!$(this).hasClass('pressed')) {  // Only process if not already pressed
+                    processImage(false);
+                }
             });
 
             function stopLiveCapture() {
