@@ -44,36 +44,42 @@
             overflow-y: auto;
         }
         #resizedImage { max-width: 100%; height: auto; }
-        .btn-custom { 
-            width: 120px;
-            height: 120px;
+        .btn-custom {
+            width: 360px;
+            height: 360px;
             border-radius: 50%;
             font-size: 16px;
             font-weight: bold;
-            margin: 10px auto;
+            margin: 20px auto;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
             white-space: normal;
-            padding: 10px;
+            padding: 20px;
             transition: all 0.3s ease;
         }
 
         .btn-custom:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+        }
+
+        .btn-custom i {
+            font-size: 120px;
+            margin-bottom: 20px;
         }
 
         #captureButton, #liveCaptureButton {
-            margin-bottom: 20px;
+            margin-bottom: 40px;
         }
 
         .button-container {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
         }
         .card { margin-bottom: 20px; }
         .card-header { 
@@ -179,8 +185,14 @@
 
     <div class="content-wrapper">
         <div class="button-container">
-            <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">Capture New Image</button>
-            <button id="liveCaptureButton" class="btn btn-success btn-custom">Start Live Capture</button>
+            <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">
+                <i class="bi bi-eye"></i>
+                Capture New Image
+            </button>
+            <button id="liveCaptureButton" class="btn btn-success btn-custom">
+                <i class="bi bi-eye"></i>
+                Start Live Capture
+            </button>
         </div>
         
         <div id="output-container">
@@ -342,14 +354,14 @@
 
             function stopLiveCapture() {
                 continuousProcessRunning = false;
-                $('#liveCaptureButton').text('Start Live Capture').removeClass('btn-danger').addClass('btn-success');
+                $('#liveCaptureButton').html('<i class="bi bi-eye"></i>Start Live Capture').removeClass('btn-danger').addClass('btn-success');
                 clearInterval(countdownInterval);
             }
 
             $('#liveCaptureButton').click(function() {
                 if (!continuousProcessRunning) {
                     continuousProcessRunning = true;
-                    $(this).text('Stop Live Capture').removeClass('btn-success').addClass('btn-danger');
+                    $(this).html('<i class="bi bi-eye"></i>Stop Live Capture').removeClass('btn-success').addClass('btn-danger');
                     processImage(true);
                 } else {
                     stopLiveCapture();
