@@ -44,7 +44,37 @@
             overflow-y: auto;
         }
         #resizedImage { max-width: 100%; height: auto; }
-        .btn-custom { font-size: 18px; padding: 10px 20px; margin: 5px 0; width: 100%; }
+        .btn-custom { 
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            white-space: normal;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+
+        #captureButton, #liveCaptureButton {
+            margin-bottom: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
         .card { margin-bottom: 20px; }
         .card-header { 
             cursor: pointer; 
@@ -148,8 +178,10 @@
     </div>
 
     <div class="content-wrapper">
-        <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">Capture New Image</button>
-        <button id="liveCaptureButton" class="btn btn-success btn-custom">Start Live Capture</button>
+        <div class="button-container">
+            <button id="captureButton" class="btn btn-primary btn-custom" style="display: none;">Capture New Image</button>
+            <button id="liveCaptureButton" class="btn btn-success btn-custom">Start Live Capture</button>
+        </div>
         
         <div id="output-container">
             <div class="card">
