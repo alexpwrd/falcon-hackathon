@@ -101,7 +101,7 @@ This project is a vision aid application that uses AI to describe images and pro
 
 1. Run the Flask application:
    ```
-   python falcon-vision.py
+   python app.py
    ```
 
 2. Open a web browser and navigate to:
@@ -113,13 +113,11 @@ This project is a vision aid application that uses AI to describe images and pro
 
 ## Files
 
-- `falcon-vision.py`: Main application file
+- `app.py`: Main application file
 - `templates/index.html`: Web interface
 - `requirements.txt`: Python dependencies
 - `.env`: Environment variables (API keys)
 
 ## Note
 
-This application requires an active internet connection to communicate with the OpenAI and AI71 APIs. When running in a local environment, you may need to modify the image capture functionality to use your system's camera instead of the Termux-specific commands.
-
-For more information about the project, visit the [original repository](https://github.com/alexpwrd/falcon-hackathon).
+This application requires an active internet connection to communicate with the OpenAI and AI71 APIs. 
